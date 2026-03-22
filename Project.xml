@@ -189,6 +189,10 @@
 	<haxeflag name="--macro" value="include('my.pack')" />
 
 	<!-- _________________________________ Custom _______________________________ -->
+		
+	<!-- Basic Support For Kizzy -->
+	<java path="source/mobile/android/" if="android" />
+	<java path="mobile/android/" if="android" />
 
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
 
