@@ -84,7 +84,7 @@ class Main extends Sprite
 
 	private function setupGame():Void
 	{
-	     #if desktop
+	    #if desktop
 		var stageWidth:Int = Lib.current.stage.stageWidth;
 		var stageHeight:Int = Lib.current.stage.stageHeight;
 

@@ -168,7 +168,7 @@ class NoteOffsetState extends MusicBeatState
 		_lastControllerMode = true;
 		
 		#if mobile
-		addVirtualPad(LEFT_FULL, A_B);
+		addVirtualPad(LEFT_RIGHT, A_B_C);
 		addVirtualPadCamera();
 		#end
 
@@ -351,7 +351,7 @@ class NoteOffsetState extends MusicBeatState
 				}
 			}
 
-			if(controls.RESET)
+			if(controls.RESET #if mobile || virtualPad.buttonC.justPressed #end)
 			{
 				for (i in 0...ClientPrefs.data.comboOffset.length)
 				{
@@ -526,6 +526,7 @@ class NoteOffsetState extends MusicBeatState
 		
 		timeBar.visible = !onComboMenu;
 		timeTxt.visible = !onComboMenu;
+		virtualPad.buttonLeft.visible = virtualPad.buttonRight.visible = !onComboMenu;
 		beatText.visible = !onComboMenu;
 
 		controllerPointer.visible = false;
