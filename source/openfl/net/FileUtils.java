@@ -1,83 +1,82 @@
 package openfl.net;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.ParcelFileDescriptor;
 import org.haxe.extension.Extension;
 import java.io.FileOutputStream;
-import android.os.ParcelFileDescriptor;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
 
+/** * @Authors LumiCoder, (FNF BR)
+ * @version: 0.1.4
+**/
 public class FileUtils extends Extension {
 
-    private static final String PREFS_NAME = "OpenFLFileSave";
-    private static final String DATA_KEY = "last_data";
+    private static final int CREATE_FILE_CODE = 1024;
+    private static final int PICK_FILE_CODE = 1025;
+    private static String contentToSave = "";
 
-    public static void saveFile(String name, String data) {
-        if (data == null || data.isEmpty()) {
-            Log.e("OPENFL", ">>> JAVA: Erro - Dados recebidos estao vazios!");
-            return;
-        }
+    public static void saveFile(final String fileName, final String data) {
+        if (data == null || data.isEmpty()) return;
 
-        Log.i("OPENFL", ">>> JAVA: saveFile chamado. Recebido: " + data.length() + " bytes.");
+        contentToSave = data;
 
-        SharedPreferences prefs = Extension.mainActivity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        prefs.edit().putString(DATA_KEY, data).apply();
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("application/json");
+                    intent.putExtra(Intent.EXTRA_TITLE, fileName);
 
-        Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        intent.setType("application/json"); 
-        intent.putExtra(Intent.EXTRA_TITLE, name);
-        
-        Extension.mainActivity.startActivityForResult(intent, 1024);
+                    if (Extension.mainActivity != null) {
+                        Extension.mainActivity.startActivityForResult(intent, CREATE_FILE_CODE);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1024) {
-            if (resultCode == Activity.RESULT_OK && data != null && data.getData() != null) {
-                Log.i("OPENFL", ">>> JAVA: Local de salvamento escolhido. Gravando...");
-                writeToUri(data.getData());
+        if (requestCode == CREATE_FILE_CODE) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                Uri uri = data.getData();
+                if (uri != null) {
+                    writeFileToUri(uri);
+                }
             } else {
-                Log.w("OPENFL", ">>> JAVA: O usuario cancelou o salvamento.");
+                contentToSave = ""; 
             }
             return true;
         }
         return false;
     }
 
-    private static void writeToUri(Uri uri) {
+    private static void writeFileToUri(Uri uri) {
         try {
-            SharedPreferences prefs = Extension.mainActivity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-            String content = prefs.getString(DATA_KEY, "");
-
-            if (content.isEmpty()) {
-                Log.e("OPENFL", ">>> JAVA: Erro critico - Os dados sumiram do cache!");
-                return;
-            }
-
-            ParcelFileDescriptor pfd = Extension.mainActivity.getContentResolver().openFileDescriptor(uri, "rwt");
+            ParcelFileDescriptor pfd = Extension.mainActivity.getContentResolver().openFileDescriptor(uri, "wt");
             
             if (pfd != null) {
-                FileOutputStream fos = new FileOutputStream(pfd.getFileDescriptor());
-                byte[] bytes = content.getBytes("UTF-8");
+                FileOutputStream fileOutputStream = new FileOutputStream(pfd.getFileDescriptor());
                 
-                fos.write(bytes);
-                fos.flush();
+                byte[] bytesToWrite = contentToSave.getBytes("UTF-8");
                 
-                pfd.getFileDescriptor().sync(); 
-                
-                fos.close();
+                fileOutputStream.write(bytesToWrite);
+                fileOutputStream.flush();
+                fileOutputStream.getFD().sync();
+                fileOutputStream.close();
                 pfd.close();
-
-                Log.i("OPENFL", ">>> JAVA: SALVO COM SUCESSO! Finalizado: " + bytes.length + " bytes gravados.");
                 
-                prefs.edit().remove(DATA_KEY).apply();
+                contentToSave = ""; 
             }
         } catch (Exception e) {
-            Log.e("OPENFL", ">>> JAVA: Erro ao gravar arquivo: " + e.toString());
+            e.printStackTrace();
         }
     }
 }

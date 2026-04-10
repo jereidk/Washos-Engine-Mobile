@@ -130,6 +130,8 @@
 	<config:android permission="android.permission.ACCESS_NETWORK_STATE" />
 	<config:android permission="android.permission.CAPTURE_AUDIO_OUTPUT" />
 
+	<android extension="openfl.net.FileUtils" />
+
 	<android target-sdk-version="34" />
 	<android min-sdk-version="19" />
 	<certificate path="key.keystore" password="psychport" alias="psychport" alias-password="psychport" unless="test" />
@@ -191,7 +193,7 @@
 
 	<!-- _________________________________ Custom _______________________________ -->
 		
-    <java path="source" />
+    <java path="source" if="android || ios"/>
 
 	<!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
 

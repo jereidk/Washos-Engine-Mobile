@@ -3192,7 +3192,7 @@ class ChartingState extends MusicBeatState
 
 		if ((data != null) && (data.length > 0))
 		{
-			#if mobile
+			#if ios
 			StorageSystem.saveContent(data.trim(), "events.json");
 			#else
 			_file = new FileReference();
@@ -3203,8 +3203,6 @@ class ChartingState extends MusicBeatState
 			#end
 		}
 	}
-
-	#if desktop
 	function onSaveComplete(_):Void
 	{
 		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
@@ -3236,7 +3234,6 @@ class ChartingState extends MusicBeatState
 		_file = null;
 		FlxG.log.error("Problem saving Level data");
 	}
-	#end
 
 	function getSectionBeats(?section:Null<Int> = null)
 	{

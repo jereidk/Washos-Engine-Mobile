@@ -9,7 +9,14 @@ import openfl.events.EventDispatcher;
 import openfl.events.HTTPStatusEvent;
 import openfl.events.IOErrorEvent;
 import openfl.events.ProgressEvent;
+import openfl.net.URLLoader;
+import openfl.net.URLRequest;
+import openfl.net.URLLoader;
+import openfl.net.URLRequest;
+import openfl.net.URLRequestMethod;
+import openfl.net.URLRequestHeader;
 import openfl.utils.ByteArray;
+import openfl.net.FileFilter;
 #if lime
 import lime.utils.Bytes;
 #end
@@ -579,29 +586,36 @@ class FileReference extends EventDispatcher
 		__data = null;
 		__path = null;
 
-		#if (desktop || android)
+		#if desktop
 		var filter = null;
 
 		if (typeFilter != null)
 		{
 			var filters = [];
-
 			for (type in typeFilter)
 			{
 				filters.push(StringTools.replace(StringTools.replace(type.extension, "*.", ""), ";", ","));
 			}
-
 			filter = filters.join(";");
 		}
 
-		#if desktop
 		var openFileDialog = new FileDialog();
 		openFileDialog.onCancel.add(openFileDialog_onCancel);
 		openFileDialog.onSelect.add(openFileDialog_onSelect);
 		openFileDialog.browse(OPEN, filter);
-		trace("Dialog Opened I but EVENTS doesn't work for now");
+
 		return true;
-		#end
+		#elseif android
+		try
+		{
+			trace("FileReference.browse(): Android not implemented yet");
+			return true;
+		}
+		catch (e:Dynamic)
+		{
+			trace("Error opening Android File Picker: " + e);
+		}
+		return false;
 		#elseif (js && html5)
 		var filter = null;
 		if (typeFilter != null)
@@ -613,14 +627,12 @@ class FileReference extends EventDispatcher
 			}
 			filter = filters.join(",");
 		}
+
 		if (filter != null)
-		{
 			__inputControl.setAttribute("accept", filter);
-		}
 		else
-		{
 			__inputControl.removeAttribute("accept");
-		}
+
 		__inputControl.onchange = function()
 		{
 			if (__inputControl.files.length == 0)
@@ -635,14 +647,13 @@ class FileReference extends EventDispatcher
 			type = "." + Path.extension(file.name);
 			name = Path.withoutDirectory(file.name);
 			__path = file.name;
-			trace('File Name: ${name}\nFile Type: ${type}\nFile Size: ${size}\nFile Path: ${__path}');
-			dispatchEvent(new Event(Event.SELECT));
+			dispatchEvent(new openfl.events.Event(openfl.events.Event.SELECT));
 		}
 		__inputControl.click();
 		return true;
-		#end
-
+		#else
 		return false;
+		#end
 	}
 
 	/**
@@ -1076,25 +1087,33 @@ class FileReference extends EventDispatcher
 
 		__dataAsDynamic = data;
 
-		if ((data is openfl.utils.ByteArrayData))
+		if ((data is ByteArrayData))
 		{
 			__data = data;
 		}
 		else
 		{
-			__data = new openfl.utils.ByteArray();
+			__data = new ByteArray();
 			__data.writeUTFBytes(Std.string(data));
 		}
 
-		#if android
+		#if android 
 		try
 		{
 			var content:String = "";
 
-			if (__data != null)
+			if (data != null && (data is String))
+			{
+				content = cast data;
+			}
+			else if (__data != null)
 			{
 				__data.position = 0;
-				content = __data.toString();
+				content = __data.readUTFBytes(__data.length);
+			}
+			else
+			{
+				content = Std.string(data); // Fallback total
 			}
 
 			if (content != null && content.length > 0)
@@ -1103,29 +1122,30 @@ class FileReference extends EventDispatcher
 				jniCall(defaultFileName != null ? defaultFileName : "file.json", content);
 
 				dispatchEvent(new Event(Event.SELECT));
-			}
-			else
-			{
-				trace("[FileReference] ERRO: Tentativa de salvar conteúdo vazio!");
+				haxe.Timer.delay(function()
+				{
+					dispatchEvent(new Event(Event.COMPLETE));
+				}, 500);
 			}
 		}
 		catch (e:Dynamic)
 		{
-			trace("[FileReference] Erro na chamada JNI: " + e);
+			Sys.println("FileReference.save(): JNI Error: " + e);
 		}
+		#else
 		#elseif desktop
 		#if (lime && !macro)
-		var saveFileDialog = new lime.ui.FileDialog();
+		var saveFileDialog = new FileDialog();
 		saveFileDialog.onCancel.add(saveFileDialog_onCancel);
 		saveFileDialog.onSelect.add(saveFileDialog_onSelect);
-		saveFileDialog.browse(SAVE, defaultFileName != null ? haxe.io.Path.extension(defaultFileName) : null, defaultFileName);
+		saveFileDialog.browse(SAVE, defaultFileName != null ? Path.extension(defaultFileName) : null, defaultFileName);
 		#end
 		#elseif (js && html5)
 		#if (lime && !macro)
-		var saveFileDialog = new lime.ui.FileDialog();
+		var saveFileDialog = new FileDialog();
 		saveFileDialog.onCancel.add(saveFileDialog_onCancel);
 		saveFileDialog.onSave.add(saveFileDialog_onSave);
-		saveFileDialog.save(__data, defaultFileName != null ? haxe.io.Path.extension(defaultFileName) : null, defaultFileName);
+		saveFileDialog.save(__data, defaultFileName != null ? Path.extension(defaultFileName) : null, defaultFileName);
 		#end
 		#end
 	}
