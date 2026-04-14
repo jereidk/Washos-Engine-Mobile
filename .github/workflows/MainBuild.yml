@@ -114,6 +114,7 @@ jobs:
           haxelib install hmm --quiet
           haxelib run hmm setup
           haxelib run hmm install
+          haxelib run hxCodec install
           haxelib run lime rebuild hxcpp --quiet
 
       - name: Compile
