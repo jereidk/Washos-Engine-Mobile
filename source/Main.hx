@@ -168,7 +168,7 @@ class Main extends Sprite
 		dateNow = dateNow.replace(" ", "_");
 		dateNow = dateNow.replace(":", "'");
 
-		path = "crash/" + "PsychEngine_" + dateNow + ".txt";
+		path = "crash/" + "PsychEngine_0.7.3_" + dateNow + ".txt";
 
 		for (stackItem in callStack)
 		{
@@ -183,19 +183,19 @@ class Main extends Sprite
 
 		errMsg += "\nUncaught Error: " + e.error + "\nPlease report this error to the GitHub page: https://github.com/DeveloperPorting/Psych-Engine-0.7.3-Mobile\n\n> Crash Handler written by: sqirra-rng";
 
-		#if mobile
-        StorageSystem.saveContent(path, errMsg + "\n");
-		#else
-		if (!FileSystem.exists("./crash/"))
-			FileSystem.createDirectory("./crash/");
+		if (!FileSystem.exists("crash"))
+			FileSystem.createDirectory("crash");
 
 		File.saveContent(path, errMsg + "\n");
-		#end
 
 		Sys.println(errMsg);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
 
+		#if (ios || desktop)
 		Application.current.window.alert(errMsg, "Error!");
+		#else
+		extension.androidtools.Tools.showAlertDialog("Error!", errMsg, {name: "Close", func: null}, null);
+		#end
 		#if DISCORD_ALLOWED
 		DiscordClient.shutdown();
 		#end
