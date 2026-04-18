@@ -11,9 +11,14 @@ class MobileFunctions
 		var lua:State = funk.lua;
 
 		#if mobile
-		Lua_helper.add_callback(lua, "haptic", function(duration:Int, ?period:Int)
+		Lua_helper.add_callback(lua, "vibrate", function(duration:Float, ?period:Int = 0)
 		{
-			return Haptic.vibrate(period, duration);
+			if (duration <= 0)
+			{
+				FunkinLua.luaTrace("vibrate: Invalid duration! Use seconds (ex: 0.5)", false, false, 0xFFFF0000);
+				return;
+			}
+			Haptic.vibrate(period, duration);
 		});
 
 		Lua_helper.add_callback(lua, "touchUtilJustPressed", TouchUtil.justPressed);

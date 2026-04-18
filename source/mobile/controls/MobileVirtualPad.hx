@@ -126,7 +126,6 @@ class MobileVirtualPad extends FlxMobileInputManager
                 buttonB = add(createButton(screenW - 258, screenH - 135, 'b', 0xFFCB00, [B]));
                 buttonZ = add(createButton(screenW - 132, screenH - 255, 'z', 0xCCB98E, [Z]));
                 buttonA = add(createButton(screenW - 132, screenH - 135, 'a', 0xFF0000, [A]));
-                
             case NONE:
                 // lmao
             default:
