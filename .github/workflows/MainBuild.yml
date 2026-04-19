@@ -14,16 +14,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v2.0.2
         with:
-          haxe-version: 4.3.2
+          haxe-version: 4.3.7
 
       - name: Install Libraries
         run: |
@@ -41,7 +35,7 @@ jobs:
           haxelib run lime config ANDROID_SETUP true
 
       - name: Compile
-        run: haxelib run lime build android -release -Dnext
+        run: haxelib run lime build android -release
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -63,7 +57,7 @@ jobs:
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v2.0.2
         with:
-          haxe-version: 4.3.2
+          haxe-version: 4.3.7
           
       - name: Install Libraries
         run: |
@@ -99,7 +93,7 @@ jobs:
   # -----------------------------------------------------------------
   windows:
     name: Build Windows
-    runs-on: windows-latest
+    runs-on: windows-2022
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -107,11 +101,11 @@ jobs:
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v2.0.2
         with:
-          haxe-version: 4.3.2
+          haxe-version: 4.3.7
 
       - name: Install Libraries
         run: |
-          haxelib setup C:/haxelib
+          haxelib setup D:/haxelib
           haxelib install hmm --quiet
           haxelib run hmm setup
           haxelib run hmm install
@@ -140,7 +134,7 @@ jobs:
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v2.0.2
         with:
-          haxe-version: 4.3.2
+          haxe-version: 4.3.7
 
       - name: Install System Dependencies
         run: |
@@ -177,7 +171,7 @@ jobs:
       - name: Setup Haxe
         uses: krdlab/setup-haxe@v2.0.2
         with:
-          haxe-version: 4.3.2
+          haxe-version: 4.3.7
 
       - name: Install Libraries
         run: |
