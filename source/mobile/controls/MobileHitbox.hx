@@ -4,9 +4,9 @@ import flixel.FlxG;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
 import openfl.display.Shape;
-import mobile.flixel.FlxButton;
-import mobile.flixel.input.FlxMobileInputManager;
-import mobile.flixel.input.FlxMobileInputID;
+import mobile.backend.flixel.FlxButton;
+import mobile.backend.flixel.input.FlxMobileInputManager;
+import mobile.backend.flixel.input.FlxMobileInputID;
 
 /**
  * Hitbox... HIT

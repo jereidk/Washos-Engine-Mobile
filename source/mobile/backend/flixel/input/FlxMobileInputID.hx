@@ -1,4 +1,4 @@
-package mobile.flixel.input;
+package mobile.backend.flixel.input;
 
 import flixel.system.macros.FlxMacroUtil;
 

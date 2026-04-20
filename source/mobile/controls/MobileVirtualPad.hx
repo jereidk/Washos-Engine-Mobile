@@ -8,8 +8,8 @@ import flixel.util.FlxDestroyUtil;
 import mobile.flixel.FlxButton;
 import openfl.utils.Assets;
 import openfl.display.BitmapData;
-import mobile.flixel.input.FlxMobileInputManager;
-import mobile.flixel.input.FlxMobileInputID;
+import mobile.backend.flixel.input.FlxMobileInputManager;
+import mobile.backend.input.FlxMobileInputID;
 
 #if MODS_ALLOWED
 import sys.FileSystem;
