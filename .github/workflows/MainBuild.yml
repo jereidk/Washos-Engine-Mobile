@@ -25,6 +25,7 @@ jobs:
           haxelib run hmm setup
           haxelib run hmm install
           haxelib run lime rebuild hxcpp --quiet
+          haxelib run lime rebuild cpp --quiet
 
       - name: Configure Android
         run: |
@@ -64,7 +65,8 @@ jobs:
          haxelib install hmm --quiet
          haxelib run hmm setup --quiet
          haxelib run hmm install --quiet
-         haxelib run lime rebuild hxcpp
+         haxelib run lime rebuild hxcpp --quiet
+         haxelib run lime rebuild cpp --quiet
 
       - name: Compile
         run: haxelib run lime build ios -nosign
@@ -103,12 +105,11 @@ jobs:
 
       - name: Install Libraries
         run: |
-          haxelib setup D:/haxelib
           haxelib install hmm --quiet
           haxelib run hmm setup
           haxelib run hmm install
           haxelib run lime rebuild hxcpp --quiet
-          haxelib run lime rebuild windows --quiet
+          haxelib run lime rebuild cpp --quiet
 
       - name: Compile
         run: haxelib run lime build windows -release
@@ -146,6 +147,7 @@ jobs:
           haxelib run hmm setup
           haxelib run hmm install
           haxelib run lime rebuild hxcpp --quiet
+          haxelib run lime rebuild cpp --quiet
 
       - name: Compile
         run: haxelib run lime build linux -release
@@ -178,6 +180,7 @@ jobs:
           haxelib run hmm setup
           haxelib run hmm install
           haxelib run lime rebuild hxcpp --quiet
+          haxelib run lime rebuild cpp --quiet
 
       - name: Compile
         run: haxelib run lime build mac -release
@@ -187,4 +190,4 @@ jobs:
         with:
           name: PsychEngine-MacOS
           path: export/release/macos/bin/
-          if-no-files-found: error          
+          if-no-files-found: error
