@@ -5,11 +5,11 @@ import flixel.graphics.FlxGraphic;
 import flixel.graphics.frames.FlxTileFrames;
 import flixel.math.FlxPoint;
 import flixel.util.FlxDestroyUtil;
-import mobile.flixel.FlxButton;
+import mobile.backend.flixel.FlxButton;
 import openfl.utils.Assets;
 import openfl.display.BitmapData;
-import mobile.flixel.input.FlxMobileInputManager;
-import mobile.flixel.input.FlxMobileInputID;
+import mobile.backend.flixel.input.TouchInputManager;
+import mobile.backend.flixel.input.FlxMobileInputID;
 
 #if MODS_ALLOWED
 import sys.FileSystem;
@@ -40,7 +40,7 @@ enum MobileActionMode {
  *
  * @author StarNova (Cream.BR)
  */
-class MobileVirtualPad extends FlxMobileInputManager
+class MobileVirtualPad extends TouchInputManager
 {
     public var buttons:Array<FlxButton> = [];
 
@@ -119,9 +119,9 @@ class MobileVirtualPad extends FlxMobileInputManager
                 buttonZ = add(createButton(screenW - 132, screenH - 255, 'z', 0xCCB98E, [Z]));
                 buttonA = add(createButton(screenW - 132, screenH - 135, 'a', 0xFF0000, [A]));
              case CHARACTER_EDITOR:
-                buttonV = add(createButton(screenW - 510, screenH - 255, 'v', 0x49A9B2, [V]));
+                buttonV = add(createButton(screenW - 384, screenH - 255, 'v', 0x49A9B2, [V]));
                 buttonD = add(createButton(screenW - 510, screenH - 135, 'd', 0x0078FF, [D]));
-                buttonX = add(createButton(screenW - 384, screenH - 255, 'x', 0x99062D, [X]));
+                buttonX = add(createButton(screenW - 258, screenH - 255, 'x', 0x99062D, [X]));
                 buttonC = add(createButton(screenW - 384, screenH - 135, 'c', 0x44FF00, [C]));
                 buttonB = add(createButton(screenW - 258, screenH - 135, 'b', 0xFFCB00, [B]));
                 buttonZ = add(createButton(screenW - 132, screenH - 255, 'z', 0xCCB98E, [Z]));
@@ -134,7 +134,7 @@ class MobileVirtualPad extends FlxMobileInputManager
         }
 
         scrollFactor.set();
-        updateTrackedButtons();
+        refreshMappedButtons();
     }
 
     private function createButton(X:Float, Y:Float, Graphic:String, Color:Int, IDs:Array<FlxMobileInputID>):FlxButton

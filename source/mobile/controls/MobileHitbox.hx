@@ -4,16 +4,16 @@ import flixel.FlxG;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
 import openfl.display.Shape;
-import mobile.flixel.FlxButton;
-import mobile.flixel.input.FlxMobileInputManager;
-import mobile.flixel.input.FlxMobileInputID;
+import mobile.backend.flixel.FlxButton;
+import mobile.backend.flixel.input.TouchInputManager;
+import mobile.backend.flixel.input.FlxMobileInputID;
 
 /**
  * Hitbox... HIT
  * @author StarNova (Cream.BR)
  */
  
-class MobileHitbox extends FlxMobileInputManager
+class MobileHitbox extends TouchInputManager
 {
 	public var buttons:Array<FlxButton> = [];
 	
@@ -23,6 +23,8 @@ class MobileHitbox extends FlxMobileInputManager
 	public var buttonRight:FlxButton;
 
 	private final alphaTarget:Float = 0.2;
+	
+	private var _cachedGraphics:Map<Int, flixel.graphics.FlxGraphic> = new Map();
 
 	public function new():Void
 	{
@@ -48,14 +50,23 @@ class MobileHitbox extends FlxMobileInputManager
 		buttonRight = buttons[3];
 
 		scrollFactor.set();
-		updateTrackedButtons();
+		refreshMappedButtons();
 	}
 
-	private function createHint(X:Float, Y:Float, Width:Int, Height:Int, Color:Int, IDs:Array<FlxMobileInputID>):FlxButton
+	private function createHint(X:Float, Y:Float, Width:Int, Height:Int, Color:FlxColor, IDs:Array<FlxMobileInputID>):FlxButton
 	{
 		var hint:FlxButton = new FlxButton(X, Y, IDs);
-		hint.loadGraphic(createHintGraphic(Width, Height, Color));
 		
+		var graphicKey:Int = Color + Width;
+		var bgGraphic:flixel.graphics.FlxGraphic = _cachedGraphics.get(graphicKey);
+		
+		if (bgGraphic == null) {
+			var bitmap:BitmapData = new BitmapData(Width, Height, true, (Color & 0x00FFFFFF) | 0x88000000);
+			bgGraphic = FlxG.bitmap.add(bitmap, false, "hitbox_" + graphicKey);
+			_cachedGraphics.set(graphicKey, bgGraphic);
+		}
+		
+		hint.loadGraphic(bgGraphic);
 		hint.solid = hint.moves = false;
 		hint.immovable = true;
 		hint.scrollFactor.set();
@@ -89,7 +100,8 @@ class MobileHitbox extends FlxMobileInputManager
 		return hint;
 	}
 
-	private function createHintGraphic(Width:Int, Height:Int, Color:Int):BitmapData
+    // It will be used for skins in the future
+	/*private function createHintGraphic(Width:Int, Height:Int, Color:Int):BitmapData
 	{
 		var shape:Shape = new Shape();
 		shape.graphics.beginFill(Color);
@@ -99,12 +111,19 @@ class MobileHitbox extends FlxMobileInputManager
 		var bitmap:BitmapData = new BitmapData(Width, Height, true, 0);
 		bitmap.draw(shape);
 		return bitmap;
-	}
+	}*/
 
 	override function destroy():Void
 	{
 		super.destroy();
 		for (btn in buttons)
 			FlxDestroyUtil.destroy(btn);
+			
+		for (key in _cachedGraphics.keys()) {
+			var graphic = _cachedGraphics.get(key);
+			FlxG.bitmap.remove(graphic);
+			graphic.destroy();
+		}
+		_cachedGraphics.clear();
 	}
 }

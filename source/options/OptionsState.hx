@@ -81,11 +81,14 @@ class OptionsState extends MusicBeatState
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence("Options Menu", null);
 		#end
+		
 		#if mobile
         controls.isInSubstate = false;
-        
-        removeVirtualPad();
-		addVirtualPad(UP_DOWN, A_B);
+
+		removeVirtualPad();
+		new FlxTimer().start(0.3, function(tmr:FlxTimer) {
+			addVirtualPad(UP_DOWN, A_B);
+		});
 		#end
 	}
 

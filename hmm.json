@@ -4,8 +4,8 @@
       "name": "lime",
       "type": "git",
       "dir": null,
-      "ref": "2fdc4b4f8460e9e36bd5ced9098af135072acb05",
-      "url": "https://github.com/FunkinCrew/lime"
+      "ref": "main",
+      "url": "https://github.com/DeveloperPorting-Stuff/lime"
     },
     {
       "name": "openfl",

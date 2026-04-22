@@ -5,7 +5,7 @@ import flixel.input.gamepad.FlxGamepadInputID;
 import flixel.input.gamepad.mappings.FlxGamepadMapping;
 import flixel.input.keyboard.FlxKey;
 #if mobile
-import mobile.flixel.input.FlxMobileInputID;
+import mobile.backend.flixel.input.FlxMobileInputID;
 #end
 
 class Controls
@@ -169,7 +169,7 @@ class Controls
 	{
 		if (keys != null && requested.virtualPad != null)
 		{
-			if (requested.virtualPad.anyPressed(keys) == true)
+			if (requested.virtualPad.isAnyPressed(keys) == true)
 			{
 				controllerMode = true; // !!DO NOT DISABLE THIS IF YOU DONT WANT TO KILL THE INPUT FOR MOBILE!!
 				return true;
@@ -182,7 +182,7 @@ class Controls
 	{
 		if (keys != null && requested.virtualPad != null)
 		{
-			if (requested.virtualPad.anyJustPressed(keys) == true)
+			if (requested.virtualPad.isAnyJustPressed(keys) == true)
 			{
 				controllerMode = true;
 				return true;
@@ -195,7 +195,7 @@ class Controls
 	{
 		if (keys != null && requested.virtualPad != null)
 		{
-			if (requested.virtualPad.anyJustReleased(keys) == true)
+			if (requested.virtualPad.isAnyJustReleased(keys) == true)
 			{
 				controllerMode = true;
 				return true;
@@ -208,7 +208,7 @@ class Controls
 	{
 		if (keys != null && requested.hitbox != null && gameplayRequest != null)
 		{
-			if (gameplayRequest.anyPressed(keys))
+			if (gameplayRequest.isAnyPressed(keys))
 			{
 				controllerMode = true;
 				return true;
@@ -221,7 +221,7 @@ class Controls
 	{
 		if (keys != null && requested.hitbox != null && gameplayRequest != null)
 		{
-			if (gameplayRequest.anyJustPressed(keys))
+			if (gameplayRequest.isAnyJustPressed(keys))
 			{
 				controllerMode = true;
 				return true;
@@ -234,7 +234,7 @@ class Controls
 	{
 		if (keys != null && requested.hitbox != null && gameplayRequest != null)
 		{
-			if (gameplayRequest.anyJustReleased(keys))
+			if (gameplayRequest.isAnyJustReleased(keys))
 			{
 				controllerMode = true;
 				return true;
