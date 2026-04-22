@@ -61,10 +61,7 @@ class Main extends Sprite
             StorageSystem.getPermissions(); 
             return; 
         }
-
-        StorageSystem.getPermissions();
-        Sys.setCwd(StorageSystem.getStorageDirectory());
-        #end
+		#end
 
 		if (stage != null)
 		{
