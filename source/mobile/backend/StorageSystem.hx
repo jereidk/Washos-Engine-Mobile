@@ -120,8 +120,6 @@ class StorageSystem
 		}
 	}
 	#end
-<<<<<<< HEAD
-
 	public static function downloadZipRecursive(?url:String):Void
     {
         if (url == null) 
@@ -195,7 +193,6 @@ class StorageSystem
             #end
         }
     }
-=======
 	
    /**
    * Recursively copies any folder from the APK (assets, mods, etc.) to the external directory
@@ -312,5 +309,4 @@ class StorageSystem
     }
     #end
   }
->>>>>>> 81f3604a9d4b7e53c06149a3151bffd7f0fbdb07
 }

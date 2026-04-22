@@ -77,7 +77,7 @@ class Main extends Sprite
 			if (hasInternet)
 			{
 				trace("Internet detected! Downloading assets...");
-				StorageSystem.downloadAssetsZip();
+				StorageSystem.downloadZipRecursive();
 				StorageSystem.copyFromAPK("mods/"); // n fiz de mods ent ja usa esse
 				return;
 			}
