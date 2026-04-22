@@ -86,6 +86,7 @@ class Main extends Sprite
 				trace("No internet! Copying base assets from APK...");
 				Sys.setCwd(StorageSystem.getStorageDirectory());
 				StorageSystem.copyFromAPK("assets/");
+				StorageSystem.copyFromAPK("mods/");
 			}
 		}
 		else
