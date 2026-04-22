@@ -16,14 +16,17 @@ import openfl.utils.ByteArray;
 import openfl.utils.Assets;
 import haxe.Http;
 import haxe.zip.Reader;
+#if sys
+import sys.FileSystem;
+import sys.io.File;
+#end
 using StringTools;
 
-/** 
- * @Authors StarNova (Cream.BR), LumiCoder (FNF BR)
- * @version: 0.1.5 (Indev)
-**/
+/** * @Authors StarNova (Cream.BR), LumiCoder (FNF BR)
+ * @version 0.1.5
+ */
 class StorageSystem
-{ 
+{
 	private static var folderName(get, never):String;
 
 	private static function get_folderName():String
@@ -31,10 +34,23 @@ class StorageSystem
 		return Application.current.meta.get('file');
 	}
 
+	/**
+	 * Returns the base storage directory path without forcing a trailing slash.
+	 */
 	public static inline function getStorageDirectory():String
-		return #if android Path.addTrailingSlash(Environment.getExternalStorageDirectory() + '/.' +
-			folderName) #elseif ios lime.system.System.documentsDirectory #else Sys.getCwd() #end;
+	{
+		#if android
+		return Path.addTrailingSlash(Environment.getExternalStorageDirectory() + '/.' + folderName);
+		#elseif ios
+		return lime.system.System.documentsDirectory;
+		#else
+		return Sys.getCwd();
+		#end
+	}
 
+	/**
+	 * Returns the base storage directory path.
+	 */
 	public static function getDirectory():String
 	{
 		#if android
@@ -47,7 +63,7 @@ class StorageSystem
 	}
 
 	/**
-	 * Request permission to access the files
+	 * Requests Android storage permissions and verifies external assets.
 	 */
 	public static function getPermissions():Void
 	{
@@ -71,6 +87,7 @@ class StorageSystem
 			if (!Environment.isExternalStorageManager())
 				Settings.requestSetting('MANAGE_APP_ALL_FILES_ACCESS_PERMISSION');
 		}
+		#end
 
 		try
 		{
@@ -130,9 +147,11 @@ class StorageSystem
 		{
 			trace("Storage Error: " + e);
 		}
-		#end
 	}
 
+	/**
+	 * Initiates the internal APK asset extraction fallback.
+	 */
 	private static function startApkCopy():Void
 	{
 		#if android
@@ -163,7 +182,7 @@ class StorageSystem
 	}
 
 	/**
-	 * Saves a file in 'files' Directory
+	 * Saves text content to the internal 'files' directory.
 	 */
 	#if sys
 	public static function saveContent(name:String = 'file', ext:String = '.json', data:String = ''):Void
@@ -181,9 +200,9 @@ class StorageSystem
 			File.saveContent(fullPath, data);
 
 			#if android
-			Tools.showAlertDialog("Sucess!", "File saved in:\n" + saveFolder + "/" + name + ext, {name: "OK", func: null}, null);
+			Tools.showAlertDialog("Success!", "File saved in:\n" + saveFolder + "/" + name + ext, {name: "OK", func: null}, null);
 			#elseif ios
-			Application.current.window.alert("File saved in:\n" + saveFolder + "/" + name + ext, "Sucess!");
+			Application.current.window.alert("File saved in:\n" + saveFolder + "/" + name + ext, "Success!");
 			#end
 		}
 		catch (e:haxe.Exception)
@@ -200,6 +219,9 @@ class StorageSystem
 	}
 	#end
 
+	/**
+	 * Downloads a ZIP file containing assets from the provided URL via JNI.
+	 */
 	public static function downloadZipRecursive(?url:String):Void
 	{
 		if (url == null)
@@ -236,6 +258,9 @@ class StorageSystem
 		#end
 	}
 
+	/**
+	 * Extracts the downloaded ZIP file into the target directory.
+	 */
 	private static function extractZip(zipPath:String, outputDir:String):Void
 	{
 		try
@@ -279,7 +304,7 @@ class StorageSystem
 			FileSystem.deleteFile(zipPath);
 
 			#if android
-			Tools.showAlertDialog("Sucess", "Assets Extracted Successfully. Restart the Game.", {name: "OK", func: function()
+			Tools.showAlertDialog("Success", "Assets Extracted Successfully. Restart the Game.", {name: "OK", func: function()
 			{
 				lime.system.System.exit(0);
 			}}, null);
@@ -295,10 +320,10 @@ class StorageSystem
 	}
 
 	/**
-	 * Recursively copies any folder from the APK (assets, mods, etc.) to the external directory
+	 * Recursively copies any folder from the APK (assets, mods, etc.) to the external directory.
 	 * @param sourceDir The source path within the APK (e.g., "assets/" or "mods/")
 	 * @param targetDir Destination path (optional, uses getDirectory() + sourceDir if null)
-	 * @param forceOverwrite If true, always replace files to ensure updates are applied
+	 * @param forceOverwrite If true, always replaces files to ensure updates are applied
 	 */
 	public static function copyFromAPK(sourceDir:String, targetDir:String = null, forceOverwrite:Bool = true):Void
 	{
@@ -354,7 +379,7 @@ class StorageSystem
 
 							try
 							{
-								fileBytes = Assets.getBytes(assetPath);
+								fileBytes = lime.utils.Assets.getBytes(assetPath);
 							}
 							catch (e:Dynamic)
 							{
@@ -364,7 +389,7 @@ class StorageSystem
 							{
 								try
 								{
-									fileBytes = Assets.getBytes(assetPath);
+									fileBytes = openfl.utils.Assets.getBytes(assetPath);
 								}
 								catch (e:Dynamic)
 								{
@@ -388,25 +413,25 @@ class StorageSystem
 								}
 								else
 								{
-									trace('Warn: Impossible extract $assetPath.');
+									trace('Warn: Impossible to extract $assetPath.');
 								}
 							}
 						}
 					}
 				}
 			}
-			trace('Extraction Successfuly! $copiedCount to: $targetDir');
+			trace('Extraction Successfully! $copiedCount to: $targetDir');
 		}
 		catch (e:Dynamic)
 		{
 			trace('Error on Copy Files: $e');
-			Application.current.window.alert('Error', 'Error on Copy. Verify the External Permissions.');
+			Application.current.window.alert('Error', 'Error on Copy. Verify External Permissions.');
 		}
 		#end
 	}
 
 	/**
-	 * Creates folders recursively in a safe way, fixing the absolute paths bug in Android
+	 * Creates folders recursively in a safe way, fixing absolute paths issues.
 	 */
 	private static function createDirectoryRecursive(path:String):Void
 	{
