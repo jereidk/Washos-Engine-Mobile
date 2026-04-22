@@ -33,7 +33,7 @@ class StorageSystem
 
 	public static inline function getStorageDirectory():String
 		return #if android Path.addTrailingSlash(Environment.getExternalStorageDirectory() + '/.' +
-			folderName) #elseif ios System.documentsDirectory #else Sys.getCwd() #end;
+			folderName) #elseif ios lime.system.System.documentsDirectory #else Sys.getCwd() #end;
 
 	public static function getDirectory():String
 	{
