@@ -27,7 +27,7 @@ class FPSCounter extends TextField
 	{
 		super();
 
-		this.x = x;
+		this.x = x + 20;
 		this.y = y;
 
 		currentFPS = 0;

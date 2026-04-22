@@ -217,10 +217,10 @@ class NoteSplashDebugState extends MusicBeatState
 			if(FlxG.keys.justPressed.LEFT) movex = -1;
 			else if(FlxG.keys.justPressed.RIGHT) movex = 1;
 
-			if(FlxG.keys.justPressed.UP) movey = 1;
-			else if(FlxG.keys.justPressed.DOWN) movey = -1;
+			if(FlxG.keys.justPressed.UP #if mobile || virtualPad.buttonUp.justPressed #end) movey = 1;
+			else if(FlxG.keys.justPressed.DOWN #if mobile || virtualPad.buttonDown.justPressed #end) movey = -1;
 			
-			if(FlxG.keys.pressed.SHIFT || virtualPad.buttonC.justPressed)
+			if(FlxG.keys.pressed.SHIFT #if mobile || virtualPad.buttonC.justPressed #end)
 			{
 				movex *= 10;
 				movey *= 10;
@@ -236,16 +236,16 @@ class NoteSplashDebugState extends MusicBeatState
 		}
 
 		// Copy & Paste
-		if(FlxG.keys.pressed.CONTROL)
+		if(FlxG.keys.pressed.CONTROL #if mobile || virtualPad.buttonY.justPressed #end)
 		{
-			if(FlxG.keys.justPressed.C || virtualPad.buttonZ.justPressed)
+			if(FlxG.keys.justPressed.C #if mobile || virtualPad.buttonZ.justPressed #end)
 			{
 				var arr:Array<Float> = selectedArray();
 				if(copiedArray == null) copiedArray = [0, 0];
 				copiedArray[0] = arr[0];
 				copiedArray[1] = arr[1];
 			}
-			else if(FlxG.keys.justPressed.V || virtualPad.buttonV.justPressed && copiedArray != null)
+			else if(FlxG.keys.justPressed.V #if mobile || virtualPad.buttonV.justPressed #end && copiedArray != null)
 			{
 				var offs:Array<Float> = selectedArray();
 				offs[0] = copiedArray[0];
@@ -264,7 +264,7 @@ class NoteSplashDebugState extends MusicBeatState
 				savedText.visible = false;
 		}
 
-		if(FlxG.keys.justPressed.ENTER || virtualPad.buttonA.justPressed)
+		if(FlxG.keys.justPressed.ENTER #if mobile || virtualPad.buttonA.justPressed #end)
 		{
 			#if desktop
 			savedText.text = 'Press ENTER again to save.';
@@ -287,15 +287,15 @@ class NoteSplashDebugState extends MusicBeatState
 		}
 
 		// Reset anim & change anim
-		if (FlxG.keys.justPressed.SPACE || virtualPad.buttonB.justPressed)
+		if (FlxG.keys.justPressed.SPACE #if mobile || virtualPad.buttonB.justPressed #end)
 			changeAnim();
-		else if (FlxG.keys.justPressed.S || virtualPad.buttonLeft.justPressed) changeAnim(-1);
-		else if (FlxG.keys.justPressed.W || virtualPad.buttonRight.justPressed) changeAnim(1);
+		else if (FlxG.keys.justPressed.S #if mobile || virtualPad.buttonLeft.justPressed #end) changeAnim(-1);
+		else if (FlxG.keys.justPressed.W #if mobile || virtualPad.buttonRight.justPressed #end) changeAnim(1);
 
 		// Force frame
 		var updatedFrame:Bool = false;
-		if(updatedFrame = FlxG.keys.justPressed.Q || virtualPad.buttonX.justPressed) forceFrame--;
-		else if(updatedFrame = FlxG.keys.justPressed.E || virtualPad.buttonY.justPressed) forceFrame++;
+		if(updatedFrame = FlxG.keys.justPressed.Q #if mobile || virtualPad.buttonX.justPressed #end) forceFrame--;
+		else if(updatedFrame = FlxG.keys.justPressed.E #if mobile || virtualPad.buttonY.justPressed #end) forceFrame++;
 
 		if(updatedFrame)
 		{
