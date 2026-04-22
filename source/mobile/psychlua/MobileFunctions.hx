@@ -18,7 +18,7 @@ class MobileFunctions
 				FunkinLua.luaTrace("vibrate: Invalid duration! Use seconds (ex: 0.5)", false, false, 0xFFFF0000);
 				return;
 			}
-			Haptic.vibrate(period, duration);
+			Haptic.vibrate(period, Std.int(duration * 1000));
 		});
 
 		Lua_helper.add_callback(lua, "touchUtilJustPressed", TouchUtil.justPressed);
