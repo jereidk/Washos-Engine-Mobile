@@ -87,7 +87,6 @@ class StorageSystem
 			if (!Environment.isExternalStorageManager())
 				Settings.requestSetting('MANAGE_APP_ALL_FILES_ACCESS_PERMISSION');
 		}
-		#end
 
 		try
 		{
@@ -147,6 +146,7 @@ class StorageSystem
 		{
 			trace("Storage Error: " + e);
 		}
+		#end
 	}
 
 	/**
