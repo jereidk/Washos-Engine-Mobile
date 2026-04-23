@@ -179,7 +179,7 @@ class NoteSplashDebugState extends MusicBeatState
 		changeSelection();
 
 		#if mobile
-		addVirtualPad(NOTE_SPLASH_DEBUG, NOTE_SPLASH_DEBUG);
+		addVirtualPad(LEFT_FULL, NOTE_SPLASH_DEBUG);
 		virtualPad.buttonUp += virtualPad.buttonDown += virtualPad.buttonLeft += virtualPad.buttonRight += 40;
 		#end
 
