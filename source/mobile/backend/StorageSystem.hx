@@ -389,7 +389,7 @@ class StorageSystem
 							{
 								try
 								{
-									fileBytes = openfl.utils.Assets.getBytes(assetPath);
+									fileBytes = Assets.getBytes(assetPath);
 								}
 								catch (e:Dynamic)
 								{
