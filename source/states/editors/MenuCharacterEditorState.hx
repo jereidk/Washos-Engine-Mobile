@@ -89,7 +89,7 @@ class MenuCharacterEditorState extends MusicBeatState
 		addCharacterUI();
 		add(UI_mainbox);
 
-		#if (mobile || desktop)
+		#if (android || desktop)
 		var loadButton:FlxButton = new FlxButton(0, 480, "Load Character", function()
 		{
 			loadCharacter();

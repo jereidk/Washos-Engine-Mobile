@@ -415,7 +415,7 @@ class DialogueCharacterEditorState extends MusicBeatState
 			saveCharacter();
 		});
 		tab_group.add(reloadImageButton);
-		#if (mobile || desktop)
+		#if (android || desktop)
 		tab_group.add(loadButton);
 		#end
 		tab_group.add(saveButton);

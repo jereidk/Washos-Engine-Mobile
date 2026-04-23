@@ -143,7 +143,7 @@ class DialogueEditorState extends MusicBeatState
 		lineInputText = new FlxUIInputText(10, soundInputText.y + 35, 200, DEFAULT_TEXT, 8);
 		blockPressWhileTypingOn.push(lineInputText);
 
-		#if (mobile || desktop)
+		#if (android || desktop)
 		var loadButton:FlxButton = new FlxButton(20, lineInputText.y + 25, "Load Dialogue", function()
 		{
 			loadDialogue();
@@ -165,7 +165,7 @@ class DialogueEditorState extends MusicBeatState
 		tab_group.add(speedStepper);
 		tab_group.add(soundInputText);
 		tab_group.add(lineInputText);
-		#if (desktop || mobile)
+		#if (android || mobile)
 		tab_group.add(loadButton);
 		#end
 		tab_group.add(saveButton);

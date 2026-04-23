@@ -126,7 +126,7 @@ class WeekEditorState extends MusicBeatState
 		UI_box.selected_tab_id = 'Week';
 		add(UI_box);
 
-		#if (mobile || desktop)
+		#if (android || desktop)
 		var loadWeekButton:FlxButton = new FlxButton(0, 650, "Load Week", function()
 		{
 			loadWeek();
