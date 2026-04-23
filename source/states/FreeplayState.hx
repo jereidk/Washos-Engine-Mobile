@@ -329,7 +329,7 @@ class FreeplayState extends MusicBeatState
 		{
 			persistentUpdate = false;
 			openSubState(new GameplayChangersSubstate());
-			removeVirtualPad();
+			#if mobile removeVirtualPad(); #end
 		}
 		else if(FlxG.keys.justPressed.SPACE)
 		{
