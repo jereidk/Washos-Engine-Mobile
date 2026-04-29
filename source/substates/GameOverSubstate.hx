@@ -46,8 +46,6 @@ class GameOverSubstate extends MusicBeatSubstate
 	override function create()
 	{
 		instance = this;
-		
-		#if mobile controls.isInSubstate = true; #end
 
 		Conductor.songPosition = 0;
 

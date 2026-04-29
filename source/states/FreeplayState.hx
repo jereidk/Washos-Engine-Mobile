@@ -56,11 +56,6 @@ class FreeplayState extends MusicBeatState
 		persistentUpdate = true;
 		PlayState.isStoryMode = false;
 		WeekData.reloadWeekFiles(false);
-		
-		#if mobile
-		if (controls.isInSubstate)
-            controls.isInSubstate = false;
-        #end
 
 		#if DISCORD_ALLOWED
 		// Updating Discord Rich Presence
@@ -227,11 +222,6 @@ class FreeplayState extends MusicBeatState
 		if(ratingSplit.length < 2) { //No decimals, add an empty space
 			ratingSplit.push('');
 		}
-		
-		#if mobile
-		if (controls.isInSubstate)
-            controls.isInSubstate = false;
-        #end
 		
 		while(ratingSplit[1].length < 2) { //Less than 2 decimals in it, add decimals then
 			ratingSplit[1] += '0';

@@ -14,6 +14,7 @@ class MusicBeatSubstate extends FlxSubState
 	public function new()
 	{
 	    instance = this;
+	    #if mobile controls.isInSubstate = true; #end
 		super();
 	}
 
