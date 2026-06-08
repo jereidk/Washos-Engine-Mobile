@@ -67,5 +67,15 @@ import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
+#if android
+import extension.androidtools.os.Environment;
+import extension.androidtools.Settings;
+import extension.androidtools.Permissions;
+import extension.androidtools.os.Build.VERSION;
+import extension.androidtools.os.Build.VERSION_CODES;
+import extension.androidtools.Tools;
+import lime.system.JNI;
+#end
+
 using StringTools;
 #end
