@@ -29,7 +29,7 @@ class MobileFunctions
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
 			
 			#if android
-			var base64String = androidmanager.os.Platform.getWallpaper();
+			var base64String = androidmanager.os.Platform.getWallpaperBase64();
 			if (base64String != null && base64String != "") 
 			{
 				try 

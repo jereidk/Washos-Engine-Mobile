@@ -317,7 +317,7 @@ class ModsMenuState extends MusicBeatState
             controls.isInSubstate = false;
         #end
         
-		if(controls.BACK && hoveringOnMods)
+		if(controls.BACK #if android || FlxG.android.justReleased.BACK #end && hoveringOnMods)
 		{
 			if(colorTween != null) {
 				colorTween.cancel();
