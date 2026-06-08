@@ -199,7 +199,7 @@ class Main extends Sprite
 		#if (ios || desktop)
 		Application.current.window.alert(errMsg, "Error!");
 		#else
-		extension.androidtools.Tools.showAlertDialog("Error!", errMsg, {name: "Close", func: null}, null);
+		PopUp.showAlert("Error!", errMsg, "Close");
 		#end
 		#if DISCORD_ALLOWED
 		DiscordClient.shutdown();

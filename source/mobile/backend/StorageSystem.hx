@@ -64,7 +64,7 @@ class StorageSystem
 		#if android
 		if (VERSION.SDK_INT >= VERSION_CODES.TIRAMISU)
 		{
-			Permissions.requestPermissions([
+			PermissionUtils.requestPermissions([
 				'READ_MEDIA_IMAGES',
 				'READ_MEDIA_VIDEO',
 				'READ_MEDIA_AUDIO',
@@ -73,14 +73,14 @@ class StorageSystem
 		}
 		else
 		{
-			Permissions.requestPermissions(['READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE']);
+			PermissionUtils.requestPermissions(['READ_EXTERNAL_STORAGE', 'WRITE_EXTERNAL_STORAGE']);
 		}
 		
 		if (VERSION.SDK_INT >= VERSION_CODES.R)
 		{
 			if (!Environment.isExternalStorageManager()) 
 			{
-				Settings.requestSetting('MANAGE_APP_ALL_FILES_ACCESS_PERMISSION');
+				Interface.requestSetting('MANAGE_APP_ALL_FILES_ACCESS_PERMISSION');
 				return true;
 			}
 		}
@@ -90,7 +90,7 @@ class StorageSystem
 			var path = getDirectory();
 			if (!FileSystem.exists(path)) FileSystem.createDirectory(path);
 			
-			if (!FileSystem.exists(path + "assets") || !FileSystem.exists(path + "content"))
+			if (!FileSystem.exists(path + "assets") || !FileSystem.exists(path + "mods"))
 			{
 				startApkCopy();
 				return true;
@@ -99,7 +99,7 @@ class StorageSystem
 			{
 				trace("Running silent integrity check...");
 				var restoredAssets = copyFromAPK("assets/", null, false);
-				var restoredContent = copyFromAPK("content/", null, false);
+				var restoredContent = copyFromAPK("mods/", null, false);
 				
 				if (restoredAssets > 0 || restoredContent > 0)
 				{
@@ -129,7 +129,7 @@ class StorageSystem
 		try
 		{
 			copyFromAPK("assets/", null, true);
-			copyFromAPK("content/", null, true);
+			copyFromAPK("mods/", null, true);
 			
 			PopUp.showConfirm("Success!", "Files extracted. The game will now restart.", "Restart", "Cancel", function() {
 				lime.system.System.exit(0);
