@@ -134,7 +134,7 @@
 	
 		<android target-sdk-version="34" />
 		<android min-sdk-version="19" />
-		<certificate path="key.keystore" password="psychport" alias="psychport" alias-password="psychport" unless="test" />
+		<certificate path="key.keystore" password="psychport" alias="psychport" alias-password="psychport" />
     </section>
     
     <!-- IOS stuff -->

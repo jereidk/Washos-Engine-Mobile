@@ -81,11 +81,11 @@
       "url": "https://github.com/DeveloperPorting-Stuff/linc_luajit"
     },
     {
-      "name": "extension-androidtools",
+      "name": "android-manager",
       "type": "git",
       "dir": null,
       "ref": "main",
-      "url": "https://github.com/DeveloperPorting-Stuff/extension-androidtools"
+      "url": "https://github.com/DeveloperPorting-Stuff/android-manager"
     }
   ]
 }
