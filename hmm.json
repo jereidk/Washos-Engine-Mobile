@@ -82,10 +82,8 @@
     },
     {
       "name": "android-manager",
-      "type": "git",
-      "dir": null,
-      "ref": "main",
-      "url": "https://github.com/DeveloperPorting-Stuff/android-manager"
+      "type": "haxelib",
+      "version": "1.0.0"
     }
   ]
 }

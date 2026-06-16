@@ -94,6 +94,9 @@ class GameOverSubstate extends MusicBeatSubstate
 			#if DISCORD_ALLOWED DiscordClient.resetClientID(); #end
 			FlxG.sound.music.stop();
 			PlayState.deathCounter = 0;
+			#if mobile
+			controls.isInSubstate = false;
+			#end
 			PlayState.seenCutscene = false;
 			PlayState.chartingMode = false;
 
@@ -164,6 +167,9 @@ class GameOverSubstate extends MusicBeatSubstate
 			isEnding = true;
 			boyfriend.playAnim('deathConfirm', true);
 			FlxG.sound.music.stop();
+			#if mobile
+			controls.isInSubstate = false;
+			#end
 			FlxG.sound.play(Paths.music(endSoundName));
 			new FlxTimer().start(0.7, function(tmr:FlxTimer)
 			{

@@ -30,8 +30,6 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	public function new()
 	{
 		super();
-		
-		#if mobile controls.isInSubstate = true; #end
 
 		if(title == null) title = 'Options';
 		if(rpcTitle == null) rpcTitle = 'Options Menu';
@@ -104,6 +102,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		}
 		
 		#if mobile
+		controls.isInSubstate = true;
 		addVirtualPad(LEFT_FULL, A_B);
 		#end
 
