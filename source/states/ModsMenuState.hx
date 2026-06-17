@@ -154,6 +154,11 @@ class ModsMenuState extends MusicBeatState
 		buttonDisableAll.focusChangeCallback = function(focus:Bool) if(!focus) buttonDisableAll.bg.color = 0xFFFF6666;
 		add(buttonDisableAll);
 		checkToggleButtons();
+		
+		#if mobile
+		addVirtualPad(UP_DOWN, B);
+		virtualPad.y -= 215;
+		#end
 
 		if(modsList.all.length < 1)
 		{
@@ -292,11 +297,6 @@ class ModsMenuState extends MusicBeatState
 		add(bgList);
 		add(modsGroup);
 		_lastControllerMode = controls.controllerMode;
-		
-		#if mobile
-		addVirtualPad(UP_DOWN, B);
-		virtualPad.y -= 215;
-		#end
 
 		changeSelectedMod();
 		super.create();
