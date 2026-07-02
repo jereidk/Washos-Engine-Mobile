@@ -98,7 +98,7 @@ jobs:
           haxe-version: ${{ env.HAXE_VER }}
           
       - name: Install System Dependencies
-        run: choco install vlc-dev -y
+        run: choco install vlc -y
 
       - name: Install Libraries
         run: |
