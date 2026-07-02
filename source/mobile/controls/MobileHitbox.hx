@@ -72,26 +72,28 @@ class MobileHitbox extends TouchInputManager
 		hint.scrollFactor.set();
 		hint.alpha = 0.00001;
 
-		var hintTween:FlxTween = null;
-		hint.onDown.callback = function() {
-		    if (hintTween != null) hintTween.cancel();
-		    
-		    hintTween = FlxTween.tween(hint, {alpha: alphaTarget}, 0.075, {
-		        ease: FlxEase.circInOut,
-		        onComplete: function(_) { hintTween = null; }
-		    });
+        if (!ClientPrefs.data.invisibleHitbox) {
+			var hintTween:FlxTween = null;
+			hint.onDown.callback = function() {
+			    if (hintTween != null) hintTween.cancel();
+			    
+			    hintTween = FlxTween.tween(hint, {alpha: alphaTarget}, 0.075, {
+			        ease: FlxEase.circInOut,
+			        onComplete: function(_) { hintTween = null; }
+			    });
+			}
+			
+			hint.onUp.callback = function() {
+			    if (hintTween != null) hintTween.cancel();
+			    
+			    hintTween = FlxTween.tween(hint, {alpha: 0.00001}, 0.15, {
+			        ease: FlxEase.circInOut,
+			        onComplete: function(_) { hintTween = null; }
+			    });
+			}
+			
+			hint.onOut.callback = hint.onUp.callback;
 		}
-		
-		hint.onUp.callback = function() {
-		    if (hintTween != null) hintTween.cancel();
-		    
-		    hintTween = FlxTween.tween(hint, {alpha: 0.00001}, 0.15, {
-		        ease: FlxEase.circInOut,
-		        onComplete: function(_) { hintTween = null; }
-		    });
-		}
-		
-		hint.onOut.callback = hint.onUp.callback;
 
 		#if FLX_DEBUG
 		hint.ignoreDrawDebug = true;

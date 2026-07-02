@@ -1,4 +1,4 @@
-package mobile.backend;
+package mobile.backend.utils;
 
 import lime.app.Application;
 import androidmanager.content.Interface;

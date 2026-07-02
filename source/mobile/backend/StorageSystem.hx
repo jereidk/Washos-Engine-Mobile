@@ -16,7 +16,7 @@ import sys.io.File;
 using StringTools;
 
 /** * @Authors StarNova (Cream.BR), LumiCoder (FNF BR)
- * @version 0.1.6
+ * @version 0.1.8
  */
 class StorageSystem
 {
@@ -27,18 +27,11 @@ class StorageSystem
 		return Application.current.meta.get('file');
 	}
 	
-	/**
-	 * Returns the base storage directory path without forcing a trailing slash.
-	 */
-	public static inline function getStorageDirectory():String
+	private static var packageName(get, never):String;
+	
+	private static function get_packageName():String
 	{
-		#if android
-		return Path.addTrailingSlash(Environment.getExternalStorageDirectory() + '/.' + folderName);
-		#elseif ios
-		return lime.system.System.documentsDirectory;
-		#else
-		return Sys.getCwd();
-		#end
+		return Application.current.meta.get('packageName');
 	}
 	
 	/**
@@ -48,6 +41,20 @@ class StorageSystem
 	{
 		#if android
 		return Environment.getExternalStorageDirectory() + '/.' + folderName + '/';
+		#elseif ios
+		return lime.system.System.documentsDirectory;
+		#else
+		return Sys.getCwd();
+		#end
+	}
+	
+	/**
+	 * Returns the assets directory path.
+	 */
+	public static function getAssetsDirectory():String
+	{
+		#if android
+		return Environment.getExternalStorageDirectory() + '/Android/media/' + packageName + '/';
 		#elseif ios
 		return lime.system.System.documentsDirectory;
 		#else
@@ -87,10 +94,14 @@ class StorageSystem
 		
 		try
 		{
-			var path = getDirectory();
-			if (!FileSystem.exists(path)) FileSystem.createDirectory(path);
+			var paths = [getAssetsDirectory(), getDirectory()];
+			if (!FileSystem.exists(paths[0])) FileSystem.createDirectory(paths[0]);
+			if (!FileSystem.exists(paths[1])) FileSystem.createDirectory(paths[1]);
 			
-			if (!FileSystem.exists(path + "assets") || !FileSystem.exists(path + "mods"))
+			// Creating .nomedia files to avoid images remaining in the gallery
+			if (!FileSystem.exists(paths[0] + ".nomedia")) File.saveContent(paths[0] + ".nomedia", "/storage/emulated/0/Android/media/" + packageName);
+			
+			if (!FileSystem.exists(paths[0] + "assets") || !FileSystem.exists(paths[1] + "mods"))
 			{
 				startApkCopy();
 				return true;
@@ -98,7 +109,7 @@ class StorageSystem
 			else
 			{
 				trace("Running silent integrity check...");
-				var restoredAssets = copyFromAPK("assets/", null, false);
+				var restoredAssets = copyFromAPK("assets/", null, false, getAssetsDirectory());
 				var restoredContent = copyFromAPK("mods/", null, false);
 				
 				if (restoredAssets > 0 || restoredContent > 0)
@@ -128,7 +139,7 @@ class StorageSystem
 		
 		try
 		{
-			copyFromAPK("assets/", null, true);
+			copyFromAPK("assets/", null, true, getAssetsDirectory());
 			copyFromAPK("mods/", null, true);
 			
 			PopUp.showConfirm("Success!", "Files extracted. The game will now restart.", "Restart", "Cancel", function() {
@@ -146,14 +157,14 @@ class StorageSystem
 	 * Recursively copies folders from the APK to external directory.
 	 * @return Int The number of files successfully copied.
 	 */
-	public static function copyFromAPK(sourceDir:String, targetDir:String = null, forceOverwrite:Bool = true):Int
+	public static function copyFromAPK(sourceDir:String, ?targetDir:String = null, ?forceOverwrite:Bool = true, ?baseDirectory:String):Int
 	{
 		var copiedCount = 0;
 		
 		#if mobile
 		if (!StringTools.endsWith(sourceDir, "/")) sourceDir += "/";
 		
-		var baseDirectory = getDirectory();
+		if (baseDirectory == null) baseDirectory = getDirectory();
 		if (targetDir == null) targetDir = baseDirectory + sourceDir;
 		if (!StringTools.endsWith(targetDir, "/")) targetDir += "/";
 		

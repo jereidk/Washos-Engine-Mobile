@@ -40,6 +40,9 @@ import states.TitleState;
 		[0xFFFF884E, 0xFFFFFAF5, 0xFF6C0000]];
 
 	public var ghostTapping:Bool = true;
+	#if mobile
+	public var invisibleHitbox:Bool = false;
+	#end
 	public var timeBarType:String = 'Time Left';
 	public var scoreZoom:Bool = true;
 	public var noReset:Bool = false;

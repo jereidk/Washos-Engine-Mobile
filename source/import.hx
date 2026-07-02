@@ -27,7 +27,8 @@ import js.html.*;
 
 #if mobile
 import mobile.backend.StorageSystem;
-import mobile.backend.TouchUtil;
+import mobile.backend.utils.TouchUtil;
+import mobile.backend.utils.PopUp;
 #end
 
 import backend.Paths;

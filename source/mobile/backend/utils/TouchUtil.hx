@@ -1,4 +1,4 @@
-package mobile.backend;
+package mobile.backend.utils;
 
 import flixel.FlxG;
 
