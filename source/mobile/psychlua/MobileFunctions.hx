@@ -4,8 +4,48 @@ import lime.ui.Haptic;
 import psychlua.FunkinLua;
 import psychlua.ModchartSprite;
 import psychlua.LuaUtils;
+
+import mobile.controls.MobileVirtualPad.MobileDPadMode;
+import mobile.controls.MobileVirtualPad.MobileActionMode;
+
 class MobileFunctions
 {
+	private static function getTargetState():Dynamic {
+		if (FlxG.state.subState != null && Std.isOfType(FlxG.state.subState, MusicBeatSubstate)) {
+			return FlxG.state.subState;
+		}
+		if (Std.isOfType(FlxG.state, MusicBeatState)) {
+			return FlxG.state;
+		}
+		return null;
+	}
+
+	private static function getTargetVirtualPad():Dynamic {
+		var target = getTargetState();
+		if (target != null && target.virtualPad != null) {
+			return target.virtualPad;
+		}
+		return null;
+	}
+
+	private static function getVPadButtonStatus(button:String, statusType:String):Bool {
+		var pad = getTargetVirtualPad();
+		if (pad == null) return false;
+		
+		var btnName = button;
+		if (!StringTools.startsWith(btnName, "button")) {
+			btnName = "button" + button.charAt(0).toUpperCase() + button.substr(1);
+		}
+
+		var buttonObj:Dynamic = Reflect.getProperty(pad, btnName);
+		if (buttonObj != null) {
+			var status:Bool = Reflect.getProperty(buttonObj, statusType);
+			return status == true;
+		}
+		
+		return false;
+	}
+
 	public static function implement(funk:FunkinLua)
 	{
 		#if LUA_ALLOWED
@@ -67,10 +107,65 @@ class MobileFunctions
 		Lua_helper.add_callback(lua, "touchUtilJustPressed", TouchUtil.justPressed);
 		Lua_helper.add_callback(lua, "touchUtilPressed", TouchUtil.pressed);
 		Lua_helper.add_callback(lua, "touchUtilJustReleased", TouchUtil.justReleased);
+
+		Lua_helper.add_callback(lua, "addVirtualPad", function(dPadMode:String, actionMode:String) 
+		{
+			var target = getTargetState();
+			if (target != null) {
+				try {
+					var dPad:MobileDPadMode = Type.createEnum(MobileDPadMode, dPadMode);
+					var action:MobileActionMode = Type.createEnum(MobileActionMode, actionMode);
+					target.addVirtualPad(dPad, action);
+				} catch (e:Dynamic) {
+					FunkinLua.luaTrace("addVirtualPad: Error! Invalid DPadMode or ActionMode string.", false, false, 0xFFFF0000);
+				}
+			}
+		});
+
+		Lua_helper.add_callback(lua, "addVirtualPadCamera", function(?defaultDrawTarget:Bool = false) 
+		{
+			var target = getTargetState();
+			if (target != null) target.addVirtualPadCamera(defaultDrawTarget);
+		});
+
+		Lua_helper.add_callback(lua, "removeVirtualPad", function() 
+		{
+			var target = getTargetState();
+			if (target != null) target.removeVirtualPad();
+		});
+
+		Lua_helper.add_callback(lua, "addMobileControls", function(?defaultDrawTarget:Bool = false) 
+		{
+			var target = getTargetState();
+			if (target != null) target.addMobileControls(defaultDrawTarget);
+		});
+
+		Lua_helper.add_callback(lua, "removeMobileControls", function() 
+		{
+			var target = getTargetState();
+			if (target != null) target.removeMobileControls();
+		});
+
+		Lua_helper.add_callback(lua, "virtualPadJustPressed", function(button:String):Bool {
+			return getVPadButtonStatus(button, "justPressed");
+		});
+
+		Lua_helper.add_callback(lua, "virtualPadPressed", function(button:String):Bool {
+			return getVPadButtonStatus(button, "pressed");
+		});
+
+		Lua_helper.add_callback(lua, "virtualPadJustReleased", function(button:String):Bool {
+			return getVPadButtonStatus(button, "justReleased");
+		});
+		
 		Lua_helper.add_callback(lua, "setHitboxVisible", function(visible:Bool = false):Void
 		{
-			PlayState.instance.hitbox.visible = visible;
+			var target = getTargetState();
+			if (target != null && target.hitbox != null) {
+				target.hitbox.visible = visible;
+			}
 		});
+		
 		Lua_helper.add_callback(lua, "enableKeyboard", function()
 		{
 			FlxG.stage.window.textInputEnabled = true;
