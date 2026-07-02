@@ -573,6 +573,16 @@ class PlayState extends MusicBeatState
 
 		startingSong = true;
 		
+		var pauseButton = new mobile.backend.PauseButton(0, 0, function()
+		{
+			var ret:Dynamic = callOnScripts('onPause', null, true);
+			if(ret != LuaUtils.Function_Stop) {
+				openPauseMenu();
+			}
+		});
+		add(pauseButton);
+		pauseButton.cameras = [camOther];
+		
 		#if mobile
 		addMobileControls(false);
 	    hitbox.visible = false;

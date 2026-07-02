@@ -83,37 +83,38 @@ jobs:
           path: export/release/ios/build/Release-iphoneos/*.ipa
           if-no-files-found: error
 
-  windows:
-    name: Build Windows
-    runs-on: windows-2022
-    env:
-      HAXEPATH: D:\haxelib
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v6.0.2
+  ## Comment Windows for now
+  ## windows:
+    ## name: Build Windows
+    ## runs-on: windows-2022
+    ## env:
+      ## HAXEPATH: D:\haxelib
+    ## steps:
+      ## - name: Checkout Repository
+        ## uses: actions/checkout@v6.0.2
 
-      - name: Setup Haxe
-        uses: krdlab/setup-haxe@v2.1.0
-        with:
-          haxe-version: ${{ env.HAXE_VER }}
+      ## - name: Setup Haxe
+        ## uses: krdlab/setup-haxe@v2.1.0
+        ## with:
+          ## haxe-version: ${{ env.HAXE_VER }}
 
-      - name: Install Libraries
-        run: |
-          haxelib install hmm --quiet
-          haxelib run hmm setup
-          haxelib run hmm install
-          haxelib run lime rebuild hxcpp --quiet
-          haxelib run lime test cpp -clean
+      ## - name: Install Libraries
+        ## run: |
+          ## haxelib install hmm --quiet
+          ## haxelib run hmm setup
+         ## haxelib run hmm install
+          ## haxelib run lime rebuild hxcpp --quiet
+          ## haxelib run lime test cpp -clean
 
-      - name: Compile
-        run: haxelib run lime build windows -release
+      ## - name: Compile
+        ## run: haxelib run lime build windows -release
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: PsychEngine-Windows
-          path: export/release/windows/bin/
-          if-no-files-found: error
+     ## - name: Upload Artifact
+        ## uses: actions/upload-artifact@v7.0.1
+        ## with:
+          ## name: PsychEngine-Windows
+          ## path: export/release/windows/bin/
+          ## if-no-files-found: error
 
   linux:
     name: Build Linux
