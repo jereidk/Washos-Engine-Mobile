@@ -96,9 +96,6 @@ jobs:
         uses: krdlab/setup-haxe@v2.1.0
         with:
           haxe-version: ${{ env.HAXE_VER }}
-          
-      - name: Install System Dependencies
-        run: choco install libvlc -y
 
       - name: Install Libraries
         run: |
