@@ -68,14 +68,5 @@ import flixel.tweens.FlxTween;
 import flixel.group.FlxSpriteGroup;
 import flixel.group.FlxGroup.FlxTypedGroup;
 
-#if android
-import androidmanager.os.Environment;
-import androidmanager.tools.PermissionUtils;
-import androidmanager.os.Build.VERSION;
-import androidmanager.os.Build.VERSION_CODES;
-import androidmanager.content.Interface;
-import mobile.backend.PopUp;
-#end
-
 using StringTools;
 #end

@@ -3,21 +3,21 @@ name: Main Build
 on: 
   workflow_dispatch:
 
+env:
+  HAXE_VER: 4.3.7
+
 jobs:
-  # -----------------------------------------------------------------
-  # 1. ANDROID BUILD
-  # -----------------------------------------------------------------
   android:
     name: Build Android
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@v2.0.2
+        uses: krdlab/setup-haxe@v2.1.0
         with:
-          haxe-version: 4.3.7
+          haxe-version: ${{ env.HAXE_VER }}
 
       - name: Install Libraries
         run: |
@@ -38,26 +38,23 @@ jobs:
         run: haxelib run lime build android -release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: PsychEngine-Android
           path: export/release/android/bin/app/build/outputs/apk/release/*.apk
           if-no-files-found: error
 
-  # -----------------------------------------------------------------
-  # 2. iOS BUILD
-  # -----------------------------------------------------------------
   ios:
     name: Build iOS
     runs-on: macos-15
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@v2.0.2
+        uses: krdlab/setup-haxe@v2.1.0
         with:
-          haxe-version: 4.3.7
+          haxe-version: ${{ env.HAXE_VER }}
           
       - name: Install Libraries
         run: |
@@ -80,30 +77,28 @@ jobs:
           zip -r PsychMobile0.7.3.ipa Payload
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: PsychEngine-iOS
           path: export/release/ios/build/Release-iphoneos/*.ipa
           if-no-files-found: error
 
-  # -----------------------------------------------------------------
-  # 3. WINDOWS BUILD
-  # -----------------------------------------------------------------
   windows:
     name: Build Windows
     runs-on: windows-2022
+    env:
+      HAXEPATH: D:\haxelib
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@v2.0.2
+        uses: krdlab/setup-haxe@v2.1.0
         with:
-          haxe-version: 4.3.7
+          haxe-version: ${{ env.HAXE_VER }}
 
       - name: Install Libraries
         run: |
-          haxelib setup D:/haxelib
           haxelib install hmm --quiet
           haxelib run hmm setup
           haxelib run hmm install
@@ -114,26 +109,23 @@ jobs:
         run: haxelib run lime build windows -release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: PsychEngine-Windows
           path: export/release/windows/bin/
           if-no-files-found: error
 
-  # -----------------------------------------------------------------
-  # 4. LINUX BUILD
-  # -----------------------------------------------------------------
   linux:
     name: Build Linux
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@v2.0.2
+        uses: krdlab/setup-haxe@v2.1.0
         with:
-          haxe-version: 4.3.7
+          haxe-version: ${{ env.HAXE_VER }}
 
       - name: Install System Dependencies
         run: |
@@ -151,26 +143,23 @@ jobs:
         run: haxelib run lime build linux -release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: PsychEngine-Linux
           path: export/release/linux/bin/
           if-no-files-found: error
 
-  # -----------------------------------------------------------------
-  # 5. MACOS BUILD (DESKTOP)
-  # -----------------------------------------------------------------
   macos:
     name: Build MacOS
     runs-on: macos-15
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Haxe
-        uses: krdlab/setup-haxe@v2.0.2
+        uses: krdlab/setup-haxe@v2.1.0
         with:
-          haxe-version: 4.3.7
+          haxe-version: ${{ env.HAXE_VER }}
 
       - name: Install Libraries
         run: |
@@ -183,8 +172,8 @@ jobs:
         run: haxelib run lime build mac -release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: PsychEngine-MacOS
           path: export/release/macos/bin/
-          if-no-files-found: error          
+          if-no-files-found: error

@@ -55,7 +55,7 @@ class Main extends Sprite
 		
         #if mobile
 		StorageSystem.getPermissions();
-		Sys.setCwd(StorageSystem.getStorageDirectory());
+		Sys.setCwd(StorageSystem.getAssetsDirectory());
 		#end
 
 		if (stage != null)
@@ -188,10 +188,10 @@ class Main extends Sprite
 			+
 			"\nPlease report this error to the GitHub page: https://github.com/DeveloperPorting/Psych-Engine-0.7.3-Mobile\n\n> Crash Handler written by: sqirra-rng";
 
-		if (!FileSystem.exists("crash"))
-			FileSystem.createDirectory("crash");
+		if (!FileSystem.exists(#if mobile StorageSystem.getDirectory() + #end "crash"))
+			FileSystem.createDirectory(#if mobile StorageSystem.getDirectory() + #end "crash");
 
-		File.saveContent(path, errMsg + "\n");
+		File.saveContent(#if mobile StorageSystem.getDirectory() + #end path, errMsg + "\n");
 
 		Sys.println(errMsg);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
