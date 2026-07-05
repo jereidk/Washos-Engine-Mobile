@@ -10,6 +10,10 @@ import objects.MusicPlayer;
 import substates.GameplayChangersSubstate;
 import substates.ResetScoreSubState;
 
+#if mobile
+import mobile.backend.MobileUtil;
+#end
+
 import flixel.math.FlxMath;
 
 class FreeplayState extends MusicBeatState
