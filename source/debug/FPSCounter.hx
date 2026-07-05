@@ -27,7 +27,7 @@ class FPSCounter extends TextField
 	{
 		super();
 
-		this.x = x + 50;
+		this.x = x #if ios + 50 #end;
 		this.y = y;
 
 		currentFPS = 0;
