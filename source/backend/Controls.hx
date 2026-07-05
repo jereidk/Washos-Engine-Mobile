@@ -6,6 +6,7 @@ import flixel.input.gamepad.mappings.FlxGamepadMapping;
 import flixel.input.keyboard.FlxKey;
 #if mobile
 import mobile.backend.flixel.input.FlxMobileInputID;
+import mobile.backend.MobileUtil;
 #end
 
 class Controls
@@ -265,6 +266,6 @@ class Controls
 	{
 		keyboardBinds = ClientPrefs.keyBinds;
 		gamepadBinds = ClientPrefs.gamepadBinds;
-		#if mobile mobileBinds = ClientPrefs.mobileBinds; #end
+		#if mobile mobileBinds = MobileUtil.mobileIDs; #end
 	}
 }
