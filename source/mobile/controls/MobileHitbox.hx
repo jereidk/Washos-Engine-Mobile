@@ -4,6 +4,7 @@ import flixel.FlxG;
 import flixel.util.FlxDestroyUtil;
 import openfl.display.BitmapData;
 import openfl.display.Shape;
+import mobile.backend.MobileUtil;
 import mobile.backend.flixel.FlxButton;
 import mobile.backend.flixel.input.TouchInputManager;
 import mobile.backend.flixel.input.FlxMobileInputID;
@@ -114,6 +115,13 @@ class MobileHitbox extends TouchInputManager
 		bitmap.draw(shape);
 		return bitmap;
 	}*/
+	
+	override public function update(elapsed:Float):Void
+	{
+		super.update(elapsed);
+	
+		MobileUtil.setControlsState(this, buttons);
+	}
 
 	override function destroy():Void
 	{

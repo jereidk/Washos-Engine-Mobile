@@ -11,6 +11,7 @@ import mobile.backend.flixel.FlxButton;
 import openfl.utils.Assets;
 import openfl.display.BitmapData;
 
+import mobile.backend.MobileUtil;
 import mobile.backend.flixel.input.TouchInputManager;
 import mobile.backend.flixel.input.FlxMobileInputID;
 
@@ -36,6 +37,7 @@ enum MobileActionMode
 	X;
 	A_B;
 	A_B_C;
+	FREEPLAY;
 	CHART_EDITOR;
 	CHARACTER_EDITOR;
     NOTE_SPLASH_DEBUG;
@@ -71,9 +73,6 @@ class MobileVirtualPad extends TouchInputManager
 	public var buttonY:FlxButton;
 	public var buttonZ:FlxButton;
 	public var buttonS:FlxButton;
-	
-	static var keyboardPressed:Bool = false;
-	static var gamepadPressed:Bool = false;
 	
 	public function new(DPad:MobileDPadMode, Action:MobileActionMode)
 	{
@@ -124,6 +123,12 @@ class MobileVirtualPad extends TouchInputManager
 				buttonB = add(createButton(screenW - 258, screenH - 135, 'b', 0xFFCB00, [B]));
 				buttonA = add(createButton(screenW - 132, screenH - 135, 'a', 0xFF0000, [A]));
 			case A_B_C:
+				buttonC = add(createButton(screenW - 384, screenH - 135, 'c', 0x44FF00, [C]));
+				buttonB = add(createButton(screenW - 258, screenH - 135, 'b', 0xFFCB00, [B]));
+				buttonA = add(createButton(screenW - 132, screenH - 135, 'a', 0xFF0000, [A]));
+			case FREEPLAY:
+			    buttonX = add(createButton(screenW - 132, screenH - 255, 'x', 0x99062D, [X]));
+			    buttonR = add(createButton(screenW - 510, screenH - 135, 'r', 0x00D0FF, [NONE]));
 				buttonC = add(createButton(screenW - 384, screenH - 135, 'c', 0x44FF00, [C]));
 				buttonB = add(createButton(screenW - 258, screenH - 135, 'b', 0xFFCB00, [B]));
 				buttonA = add(createButton(screenW - 132, screenH - 135, 'a', 0xFF0000, [A]));
@@ -216,48 +221,8 @@ class MobileVirtualPad extends TouchInputManager
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-
-		if (FlxG.touches.justStarted().length > 0)
-		{
-			if (!this.visible)
-			{
-				this.visible = true;
-				keyboardPressed = false;
-				gamepadPressed = false;
-				for (btn in buttons)
-				{
-					btn.active = true;
-					btn.visible = true;
-				}
-			}
-		}
-
-		keyboardPressed = FlxG.keys.justPressed.ANY;
-
-		if (FlxG.gamepads.numActiveGamepads > 0)
-		{
-			for (gamepad in FlxG.gamepads.getActiveGamepads())
-			{
-				if (gamepad.justPressed.ANY)
-				{
-					gamepadPressed = true;
-					break;
-				}
-			}
-		}
-
-		if (keyboardPressed || gamepadPressed)
-		{
-			if (this.visible)
-			{
-				this.visible = false;
-				for (btn in buttons)
-				{
-					btn.active = false;
-					btn.visible = false;
-				}
-			}
-		}
+	
+		MobileUtil.setControlsState(this, buttons);
 	}
 	
 	override public function destroy():Void

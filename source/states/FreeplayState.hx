@@ -160,7 +160,14 @@ class FreeplayState extends MusicBeatState
 		bottomBG.alpha = 0.6;
 		add(bottomBG);
 
+        #if mobile
+        if (MobileUtil.isTouchActive)
+	        var leText:String = "Press X to listen to the Song / Press C to open the Gameplay Changers Menu / Press R to Reset your Score and Accuracy.";
+	    else
+			var leText:String = "Press SPACE to listen to the Song / Press CTRL to open the Gameplay Changers Menu / Press RESET to Reset your Score and Accuracy.";
+        #else
 		var leText:String = "Press SPACE to listen to the Song / Press CTRL to open the Gameplay Changers Menu / Press RESET to Reset your Score and Accuracy.";
+		#end
 		bottomString = leText;
 		var size:Int = 16;
 		bottomText = new FlxText(bottomBG.x, bottomBG.y + 4, FlxG.width, leText, size);
@@ -172,7 +179,7 @@ class FreeplayState extends MusicBeatState
 		add(player);
 		
 		#if mobile
-		addVirtualPad(LEFT_FULL, A_B_C);
+		addVirtualPad(LEFT_FULL, FREEPLAY);
 		#end
 		
 		changeSelection();
@@ -192,7 +199,7 @@ class FreeplayState extends MusicBeatState
 		
 		#if mobile
 		removeVirtualPad();
-		addVirtualPad(LEFT_FULL, A_B_C);
+		addVirtualPad(LEFT_FULL, FREEPLAY);
 		#end
 	}
 
@@ -231,6 +238,13 @@ class FreeplayState extends MusicBeatState
 		while(ratingSplit[1].length < 2) { //Less than 2 decimals in it, add decimals then
 			ratingSplit[1] += '0';
 		}
+		
+		#if mobile
+		if (MobileUtil.isTouchActive)
+			bottomText.text = "Press X to listen to the Song / Press C to open the Gameplay Changers Menu / Press R to Reset your Score and Accuracy.";
+		else
+			bottomText.text = "Press SPACE to listen to the Song / Press CTRL to open the Gameplay Changers Menu / Press RESET to Reset your Score and Accuracy.";
+		#end
 
 		var shiftMult:Int = 1;
 		if(FlxG.keys.pressed.SHIFT) shiftMult = 3;
@@ -326,7 +340,7 @@ class FreeplayState extends MusicBeatState
 			openSubState(new GameplayChangersSubstate());
 			#if mobile removeVirtualPad(); #end
 		}
-		else if(FlxG.keys.justPressed.SPACE)
+		else if(FlxG.keys.justPressed.SPACE #if mobile || virtualPad.buttonX.justPressed #end)
 		{
 			if(instPlaying != curSelected && !player.playingMusic)
 			{
@@ -419,11 +433,12 @@ class FreeplayState extends MusicBeatState
 			DiscordClient.loadModRPC();
 			#end
 		}
-		else if(controls.RESET && !player.playingMusic)
+		else if(controls.RESET #if mobile || virtualPad.buttonR.justPressed #end && !player.playingMusic)
 		{
 			persistentUpdate = false;
 			openSubState(new ResetScoreSubState(songs[curSelected].songName, curDifficulty, songs[curSelected].songCharacter));
 			FlxG.sound.play(Paths.sound('scrollMenu'));
+			#if mobile removeVirtualPad(); #end
 		}
 
 		updateTexts(elapsed);

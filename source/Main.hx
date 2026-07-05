@@ -11,6 +11,9 @@ import openfl.display.Sprite;
 import openfl.events.Event;
 import openfl.display.StageScaleMode;
 import lime.app.Application;
+#if mobile
+import mobile.backend.MobileUtil;
+#end
 import states.TitleState;
 #if linux
 import lime.graphics.Image;
@@ -156,6 +159,15 @@ class Main extends Sprite
 			sprite.__cacheBitmapData = null;
 		}
 	}
+	
+	#if mobile
+	override public function update(elapsed:Float):Void
+	{
+		super.update(elapsed);
+	
+		MobileUtil.updateInputMethod();
+	}
+	#end
 
 	// Code was entirely made by sqirra-rng for their fnf engine named "Izzy Engine", big props to them!!!
 	// very cool person for real they don't get enough credit for their work
