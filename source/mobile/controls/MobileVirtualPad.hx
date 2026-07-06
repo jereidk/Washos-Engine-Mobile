@@ -216,8 +216,6 @@ class MobileVirtualPad extends TouchInputManager
 		button.scrollFactor.set();
 		button.color = Color;
 		button.alpha = 0.5;
-		button.active = MobileUtil.isTouchActive;
-		button.visible = MobileUtil.isTouchActive;
 		
 		#if FLX_DEBUG button.ignoreDrawDebug = true; #end
 		
