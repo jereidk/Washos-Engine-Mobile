@@ -57,31 +57,12 @@ class MobileFunctions
 		var hitbox = getTargetHitbox();
 		if (hitbox == null) return false;
 
-		var buttonObj:Dynamic = null;
-
-		var index:Null<Int> = Std.parseInt(button);
-		if (index != null && !Math.isNaN(index)) {
-			if (Reflect.hasField(hitbox, "hints")) {
-				var hintsArray:Array<Dynamic> = Reflect.getProperty(hitbox, "hints");
-				if (hintsArray != null && index >= 0 && index < hintsArray.length) {
-					buttonObj = hintsArray[index];
-				}
-			} else if (Reflect.hasField(hitbox, "button")) {
-				var btnArray:Array<Dynamic> = Reflect.getProperty(hitbox, "button");
-				if (btnArray != null && index >= 0 && index < btnArray.length) {
-					buttonObj = btnArray[index];
-				}
-			}
+		var btnName = button;
+		if (!StringTools.startsWith(btnName, "button")) {
+			btnName = "button" + button.charAt(0).toUpperCase() + button.substr(1);
 		}
 
-		if (buttonObj == null) {
-			var btnName = button;
-			if (!StringTools.startsWith(btnName, "button")) {
-				btnName = "button" + button.charAt(0).toUpperCase() + button.substr(1);
-			}
-			buttonObj = Reflect.getProperty(hitbox, btnName);
-		}
-
+		var buttonObj:Dynamic = Reflect.getProperty(hitbox, btnName);
 		if (buttonObj != null) {
 			var status:Bool = Reflect.getProperty(buttonObj, statusType);
 			return status == true;
