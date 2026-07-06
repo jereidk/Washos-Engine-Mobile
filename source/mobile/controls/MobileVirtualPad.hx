@@ -37,6 +37,7 @@ enum MobileActionMode
 	X;
 	A_B;
 	A_B_C;
+	STORYMENU;
 	FREEPLAY;
 	CHART_EDITOR;
 	CHARACTER_EDITOR;
@@ -216,6 +217,8 @@ class MobileVirtualPad extends TouchInputManager
 		button.scrollFactor.set();
 		button.color = Color;
 		button.alpha = 0.5;
+		button.active = MobileUtil.isTouchActive;
+		button.visible = MobileUtil.isTouchActive;
 		
 		#if FLX_DEBUG button.ignoreDrawDebug = true; #end
 		
