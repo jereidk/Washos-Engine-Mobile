@@ -28,6 +28,14 @@ class MobileFunctions
 		return null;
 	}
 
+	private static function getTargetHitbox():Dynamic {
+		var target = getTargetState();
+		if (target != null && target.hitbox != null) {
+			return target.hitbox;
+		}
+		return null;
+	}
+
 	private static function getVPadButtonStatus(button:String, statusType:String):Bool {
 		var pad = getTargetVirtualPad();
 		if (pad == null) return false;
@@ -38,6 +46,42 @@ class MobileFunctions
 		}
 
 		var buttonObj:Dynamic = Reflect.getProperty(pad, btnName);
+		if (buttonObj != null) {
+			var status:Bool = Reflect.getProperty(buttonObj, statusType);
+			return status == true;
+		}
+		return false;
+	}
+
+	private static function getHitboxButtonStatus(button:String, statusType:String):Bool {
+		var hitbox = getTargetHitbox();
+		if (hitbox == null) return false;
+
+		var buttonObj:Dynamic = null;
+
+		var index:Null<Int> = Std.parseInt(button);
+		if (index != null && !Math.isNaN(index)) {
+			if (Reflect.hasField(hitbox, "hints")) {
+				var hintsArray:Array<Dynamic> = Reflect.getProperty(hitbox, "hints");
+				if (hintsArray != null && index >= 0 && index < hintsArray.length) {
+					buttonObj = hintsArray[index];
+				}
+			} else if (Reflect.hasField(hitbox, "button")) {
+				var btnArray:Array<Dynamic> = Reflect.getProperty(hitbox, "button");
+				if (btnArray != null && index >= 0 && index < btnArray.length) {
+					buttonObj = btnArray[index];
+				}
+			}
+		}
+
+		if (buttonObj == null) {
+			var btnName = button;
+			if (!StringTools.startsWith(btnName, "button")) {
+				btnName = "button" + button.charAt(0).toUpperCase() + button.substr(1);
+			}
+			buttonObj = Reflect.getProperty(hitbox, btnName);
+		}
+
 		if (buttonObj != null) {
 			var status:Bool = Reflect.getProperty(buttonObj, statusType);
 			return status == true;
@@ -107,6 +151,19 @@ class MobileFunctions
 		Lua_helper.add_callback(lua, "touchUtilJustPressed", TouchUtil.justPressed);
 		Lua_helper.add_callback(lua, "touchUtilPressed", TouchUtil.pressed);
 		Lua_helper.add_callback(lua, "touchUtilJustReleased", TouchUtil.justReleased);
+		
+		Lua_helper.add_callback(lua, "setHitboxVisible", function(visible:Bool = false):Void
+		{
+			var target = getTargetState();
+			if (target != null && target.hitbox != null) {
+				target.hitbox.visible = visible;
+			}
+		});
+		
+		Lua_helper.add_callback(lua, "enableKeyboard", function()
+		{
+			FlxG.stage.window.textInputEnabled = true;
+		});
 
 		Lua_helper.add_callback(lua, "addVirtualPad", function(dPadMode:String, actionMode:String) 
 		{
@@ -157,18 +214,17 @@ class MobileFunctions
 		Lua_helper.add_callback(lua, "virtualPadJustReleased", function(button:String):Bool {
 			return getVPadButtonStatus(button, "justReleased");
 		});
-		
-		Lua_helper.add_callback(lua, "setHitboxVisible", function(visible:Bool = false):Void
-		{
-			var target = getTargetState();
-			if (target != null && target.hitbox != null) {
-				target.hitbox.visible = visible;
-			}
+
+		Lua_helper.add_callback(lua, "hitboxJustPressed", function(button:String):Bool {
+			return getHitboxButtonStatus(button, "justPressed");
 		});
-		
-		Lua_helper.add_callback(lua, "enableKeyboard", function()
-		{
-			FlxG.stage.window.textInputEnabled = true;
+
+		Lua_helper.add_callback(lua, "hitboxPressed", function(button:String):Bool {
+			return getHitboxButtonStatus(button, "pressed");
+		});
+
+		Lua_helper.add_callback(lua, "hitboxJustReleased", function(button:String):Bool {
+			return getHitboxButtonStatus(button, "justReleased");
 		});
 		#end
 		#end

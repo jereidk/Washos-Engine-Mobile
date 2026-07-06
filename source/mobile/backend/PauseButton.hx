@@ -9,7 +9,7 @@ import flixel.graphics.FlxGraphic;
 /**
  * Pause? PAUSE!!
  *
- * @author FalsoNova (Falso.BR)
+ * @author StarNova (Cream.BR)
  */
 class PauseButton extends FlxSprite
 {
@@ -69,15 +69,5 @@ class PauseButton extends FlxSprite
 			}
 		}
 		#end
-	}
-
-	/**
-	 * A function to create
-	 */
-	public static function create(camera:FlxCamera, ?onClick:Void->Void):PauseButton
-	{
-		var btn = new PauseButton(0, 0, onClick);
-		btn.cameras = [camera];
-		return btn;
 	}
 }

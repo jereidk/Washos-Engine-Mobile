@@ -126,6 +126,11 @@ class MobileVirtualPad extends TouchInputManager
 				buttonC = add(createButton(screenW - 384, screenH - 135, 'c', 0x44FF00, [C]));
 				buttonB = add(createButton(screenW - 258, screenH - 135, 'b', 0xFFCB00, [B]));
 				buttonA = add(createButton(screenW - 132, screenH - 135, 'a', 0xFF0000, [A]));
+			case STORYMENU:
+			    buttonR = add(createButton(screenW - 510, screenH - 135, 'r', 0x00D0FF, [NONE]));
+				buttonC = add(createButton(screenW - 384, screenH - 135, 'c', 0x44FF00, [C]));
+				buttonB = add(createButton(screenW - 258, screenH - 135, 'b', 0xFFCB00, [B]));
+				buttonA = add(createButton(screenW - 132, screenH - 135, 'a', 0xFF0000, [A]));
 			case FREEPLAY:
 			    buttonX = add(createButton(screenW - 132, screenH - 255, 'x', 0x99062D, [X]));
 			    buttonR = add(createButton(screenW - 510, screenH - 135, 'r', 0x00D0FF, [NONE]));
@@ -211,6 +216,8 @@ class MobileVirtualPad extends TouchInputManager
 		button.scrollFactor.set();
 		button.color = Color;
 		button.alpha = 0.5;
+		button.active = MobileUtil.isTouchActive;
+		button.visible = MobileUtil.isTouchActive;
 		
 		#if FLX_DEBUG button.ignoreDrawDebug = true; #end
 		
