@@ -420,6 +420,16 @@ var tempTex:RectangleTexture = context3D.createRectangleTexture(
 pngBitmap.width, pngBitmap.height, Context3DTextureFormat.BGRA, false);
 tempTex.uploadFromBitmapData(pngBitmap);
 
+var gl = context3D.gl;
+var uploadErr:Int = gl.getError();
+if (uploadErr != 0)
+{
+trace('[AstcLoader] PNG fallback upload error 0x${StringTools.hex(uploadErr, 4)} for $pngPath');
+tempTex.dispose();
+pngBitmap.dispose();
+return false;
+}
+
 var handle = tempTex.__textureID;
 tempTex.__textureID = 0;
 entry.rectTex.__textureID = handle;
