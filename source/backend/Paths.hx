@@ -287,7 +287,16 @@ class Paths
 		}
 
 		localTrackedAssets.push(file);
-		if (allowGPU && ClientPrefs.data.cacheOnGPU)
+
+		// For bitmaps that already come from a GPU texture (like ASTC-loaded ones),
+		// we should NOT try to create a new GPU texture - just use the existing one.
+		// bitmap.image is null for GPU textures, so we check that first.
+		var isGpuTexture:Bool = false;
+		#if (android && cpp)
+		isGpuTexture = (bitmap.image == null || bitmap.image.data == null);
+		#end
+
+		if (allowGPU && ClientPrefs.data.cacheOnGPU && !isGpuTexture)
 		{
 			var texture:RectangleTexture = FlxG.stage.context3D.createRectangleTexture(bitmap.width, bitmap.height, BGRA, true);
 			texture.uploadFromBitmapData(bitmap);
