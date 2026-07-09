@@ -62,6 +62,15 @@ class FunkinLua {
 
 	// Require system - cache de módulos Lua (key = "modFolder:moduleName")
 	static var requireCache:Map<String, Dynamic> = new Map<String, Dynamic>();
+	
+	// Módulos registrados para callbacks automáticos (modFolder -> array de módulos)
+	static var registeredModules:Map<String, Array<LuaModule>> = new Map<String, Array<LuaModule>>();
+	
+	// Estado compartido entre módulos del mismo mod
+	static var sharedState:Map<String, Dynamic> = new Map<String, Dynamic>();
+	
+	// Contexto por estado Lua (para require callbacks)
+	static var stateContext:Map<State, String> = new Map<State, String>();
 
 	public function new(scriptName:String) {
 		lua = LuaL.newstate();
@@ -1774,9 +1783,27 @@ class FunkinLua {
 
 	#if MODS_ALLOWED
 	/**
-	 * Require system para módulos Lua
-	 * Busca exclusivamente en mods/[modFolder]/source/[moduleName].lua
-	 * Soporta exports via return {}
+	 * Estructura para almacenar información de un módulo Lua cargado
+	 */
+	class LuaModule {
+		public var name:String;
+		public var modFolder:String;
+		public var state:State;
+		public var exports:Dynamic;
+		public var callbacks:Map<String, Bool> = new Map();
+		
+		public function new(name:String, modFolder:String, state:State, exports:Dynamic) {
+			this.name = name;
+			this.modFolder = modFolder;
+			this.state = state;
+			this.exports = exports;
+		}
+	}
+
+	/**
+	 * Require system mejorado - busca en subdirectorios también
+	 * Ej: require("utils.math") busca en mods/mod/source/utils/math.lua
+	 * Soporta: exports via return, auto-callbacks, estado compartido, require recursivo
 	 */
 	static function requireLuaModule(moduleName:String, ?scriptModFolder:String = null):Dynamic {
 		// Determinar el mod folder desde el script que está requiriendo
@@ -1790,30 +1817,39 @@ class FunkinLua {
 
 		if (currentMod == null) {
 			if (PlayState.instance != null) {
-				PlayState.instance.addTextToDebug('require: No mod folder available for module "$moduleName"', FlxColor.RED);
+				PlayState.instance.addTextToDebug('require: No mod folder available for module "' + moduleName + '"', FlxColor.RED);
 			}
 			return null;
 		}
 
-		// Cache key incluye el modFolder para evitar conflictos entre mods
+		// Normalizar nombre del módulo (reemplazar puntos con slashes para subdirectorios)
+		var normalizedName:String = StringTools.replace(moduleName, '.', '/');
 		var cacheKey:String = currentMod + ':' + moduleName;
 
 		// Verificar cache primero
 		if (requireCache.exists(cacheKey)) {
-			return requireCache.get(cacheKey);
+			var cached:Dynamic = requireCache.get(cacheKey);
+			if (cached != null && Std.isOfType(cached, LuaModule)) {
+				return cast(cached, LuaModule).exports;
+			}
+			return cached;
 		}
 
-		// Buscar el módulo en mods/[currentMod]/source/[moduleName].lua
-		var modulePath:String = Paths.mods(currentMod + '/source/' + moduleName + '.lua');
+		// Buscar el módulo en mods/[currentMod]/source/[normalizedName].lua
+		var modulePath:String = Paths.mods(currentMod + '/source/' + normalizedName + '.lua');
 
 		if (!FileSystem.exists(modulePath)) {
-			if (PlayState.instance != null) {
-				PlayState.instance.addTextToDebug('require: Module "$moduleName" not found in ' + modulePath, FlxColor.RED);
+			// Intentar también sin normalize (por si alguien usa "subdir.mod" directamente)
+			modulePath = Paths.mods(currentMod + '/source/' + moduleName + '.lua');
+			if (!FileSystem.exists(modulePath)) {
+				if (PlayState.instance != null) {
+					PlayState.instance.addTextToDebug('require: Module "' + moduleName + '" not found in mods/' + currentMod + '/source/', FlxColor.RED);
+				}
+				return null;
 			}
-			return null;
 		}
 
-		// Crear un nuevo estado Lua aislado para el módulo
+		// Crear un nuevo estado Lua para el módulo
 		var moduleState:State = LuaL.newstate();
 		LuaL.openlibs(moduleState);
 
@@ -1821,18 +1857,30 @@ class FunkinLua {
 		Lua.newtable(moduleState);
 		var exportsIdx:Int = Lua.gettop(moduleState);
 
-		// Establecer globals del módulo (pero aisladas del script principal)
+		// Crear tabla _G que apunta a los exports (módulo aislado pero con exports disponibles)
 		Lua.pushvalue(moduleState, exportsIdx);
 		Lua.setglobal(moduleState, '_G');
 
-		// Copiar constantes útiles del juego
-		if (lastCalledScript != null && lastCalledScript.lua != null) {
-			copyGlobalToState(lastCalledScript.lua, moduleState, 'Function_Stop');
-			copyGlobalToState(lastCalledScript.lua, moduleState, 'Function_Continue');
-			copyGlobalToState(lastCalledScript.lua, moduleState, 'Function_StopLua');
-			copyGlobalToState(lastCalledScript.lua, moduleState, 'Function_StopHScript');
-			copyGlobalToState(lastCalledScript.lua, moduleState, 'Function_StopAll');
-		}
+		// Establecer estado compartido del mod
+		setupSharedState(moduleState, currentMod);
+
+		// Exponer APIs completas del juego al módulo
+		setupModuleAPIs(moduleState);
+
+		// Crear tabla de contexto con el modFolder
+		Lua.newtable(moduleState);
+		Lua.pushstring(moduleState, currentMod);
+		Lua.setfield(moduleState, -2, '_modFolder');
+		Lua.setglobal(moduleState, '__ctx');
+		Lua.pop(moduleState, 1);
+
+		// Crear función require local
+		Lua.pushcclosure(moduleState, cpp.Callable.fromStaticFunction(requireCallback), 0);
+		Lua.setglobal(moduleState, 'require');
+		Lua.pop(moduleState, 1);
+
+		// Registrar el contexto del estado con el modFolder
+		stateContext.set(moduleState, currentMod);
 
 		// Cargar y ejecutar el módulo
 		var result:Int = LuaL.dofile(moduleState, modulePath);
@@ -1861,12 +1909,214 @@ class FunkinLua {
 			exported = Convert.fromLua(moduleState, exportsIdx);
 		}
 
-		Lua.close(moduleState);
-
-		// Cachear el resultado con key que incluye el modFolder
-		requireCache.set(cacheKey, exported);
+		// Crear estructura LuaModule y cachear
+		var luaModule:LuaModule = new LuaModule(moduleName, currentMod, moduleState, exported);
+		
+		// Registrar callbacks automáticos del módulo
+		registerModuleCallbacks(luaModule, moduleState, currentMod);
+		
+		requireCache.set(cacheKey, luaModule);
 
 		return exported;
+	}
+
+	/**
+	 * Callback para require() dentro de un módulo Lua
+	 * Permite require recursivo
+	 */
+	// Usamos una variable estática para guardar el estado actual durante la llamada
+	static var currentRequireState:State = null;
+	
+	static function requireCallback(L:State):Int {
+		// Obtener el nombre del módulo del stack
+		var modName:String = Lua.tostring(L, -1);
+		if (modName == null) return 0;
+		Lua.pop(L, 1);
+		
+		// Obtener el modFolder del __ctx
+		Lua.getglobal(L, '__ctx');
+		if (Lua.istable(L, -1) != 0) {
+			Lua.getfield(L, -1, '_modFolder');
+			var currentMod:String = Lua.tostring(L, -1);
+			Lua.pop(L, 2);
+			
+			if (currentMod != null) {
+				var result:Dynamic = requireLuaModule(modName, currentMod);
+				Convert.toLua(L, result);
+				return 1;
+			}
+		}
+		Lua.pop(L, 1);
+		
+		// Fallback
+		var result:Dynamic = requireLuaModule(modName);
+		Convert.toLua(L, result);
+		return 1;
+	}
+
+	/**
+	 * Establece el estado compartido del mod para el módulo
+	 */
+	static function setupSharedState(moduleState:State, modFolder:String):Void {
+		// Crear o recuperar estado compartido
+		if (!sharedState.exists(modFolder)) {
+			Lua.newtable(moduleState);
+			var sharedIdx:Int = Lua.gettop(moduleState);
+			sharedState.set(modFolder, {tableIdx: sharedIdx, state: moduleState});
+		}
+		
+		// Obtener el estado compartido y copiarlo al módulo
+		var shared:Dynamic = sharedState.get(modFolder);
+		if (shared != null && shared.tableIdx != null) {
+			// Copiar tabla compartida como _SHARED
+			Lua.pushvalue(shared.state, shared.tableIdx);
+			var copyIdx:Int = Lua.gettop(moduleState);
+			Lua.setglobal(moduleState, '_SHARED');
+			Lua.pop(moduleState, 1);
+		}
+	}
+
+	/**
+	 * Expone todas las APIs del juego al módulo Lua
+	 */
+	static function setupModuleAPIs(moduleState:State):Void {
+		// Constantes de control de flujo
+		Lua.pushnumber(moduleState, LuaUtils.Function_Stop);
+		Lua.setglobal(moduleState, 'Function_Stop');
+		Lua.pop(moduleState, 1);
+		
+		Lua.pushnumber(moduleState, LuaUtils.Function_Continue);
+		Lua.setglobal(moduleState, 'Function_Continue');
+		Lua.pop(moduleState, 1);
+		
+		Lua.pushnumber(moduleState, LuaUtils.Function_StopLua);
+		Lua.setglobal(moduleState, 'Function_StopLua');
+		Lua.pop(moduleState, 1);
+		
+		Lua.pushnumber(moduleState, LuaUtils.Function_StopHScript);
+		Lua.setglobal(moduleState, 'Function_StopHScript');
+		Lua.pop(moduleState, 1);
+		
+		Lua.pushnumber(moduleState, LuaUtils.Function_StopAll);
+		Lua.setglobal(moduleState, 'Function_StopAll');
+		Lua.pop(moduleState, 1);
+
+		// Variables globales útiles
+		Lua.pushboolean(moduleState, false);
+		Lua.setglobal(moduleState, 'luaDebugMode');
+		Lua.pop(moduleState, 1);
+		
+		Lua.pushboolean(moduleState, true);
+		Lua.setglobal(moduleState, 'luaDeprecatedWarnings');
+		Lua.pop(moduleState, 1);
+
+		//Funciones de debug via callable
+		Lua.pushcclosure(moduleState, cpp.Callable.fromStaticFunction(debugPrintCallback), 0);
+		Lua.setglobal(moduleState, 'debugPrint');
+		Lua.pop(moduleState, 1);
+	}
+
+	/**
+	 * Callback de debugPrint para módulos
+	 */
+	static function debugPrintCallback():Int {
+		var text:String = Lua.tostring(Lua.gettop() - 0);
+		if (text != null && PlayState.instance != null) {
+			PlayState.instance.addTextToDebug(text, FlxColor.WHITE);
+		}
+		return 0;
+	}
+
+	/**
+	 * Registra los callbacks automáticos de un módulo (onCreate, onUpdate, etc.)
+	 */
+	static function registerModuleCallbacks(luaModule:LuaModule, moduleState:State, modFolder:String):Void {
+		var callbacksToRegister:Array<String> = [
+			'onCreate', 'onCreatePost', 'onDestroy',
+			'onUpdate', 'onUpdatePost',
+			'onStepHit', 'onBeatHit', 'onSectionHit',
+			'onSongStart', 'onEndSong',
+			'onStartCountdown', 'onCountdownTick', 'onCountdownStarted',
+			'goodNoteHitPre', 'goodNoteHit', 'opponentNoteHitPre', 'opponentNoteHit',
+			'noteMiss', 'noteMissPress', 'ghostTap',
+			'onPause', 'onResume', 'onGameOver', 'onGameOverConfirm',
+			'onCustomSubstateCreate', 'onCustomSubstateCreatePost', 
+			'onCustomSubstateUpdate', 'onCustomSubstateUpdatePost', 'onCustomSubstateDestroy',
+			'onTweenCompleted', 'onTimerCompleted', 'onSoundFinished',
+			'onEvent', 'onEventPushed', 'eventEarlyTrigger',
+			'onDialogueStart', 'onDialogueEnd', 'onNextDialogue', 'onSkipDialogue',
+			'onRecalculateRating', 'onMoveCamera',
+			'onSpawnNote', 'onNoteAutoFormat'
+		];
+
+		for (cbName in callbacksToRegister) {
+			Lua.getglobal(moduleState, cbName);
+			if (Lua.isfunction(moduleState, -1) != 0) {
+				Lua.pop(moduleState, 1);
+				luaModule.callbacks.set(cbName, true);
+			} else {
+				Lua.pop(moduleState, 1);
+			}
+		}
+
+		// Registrar módulo para callbacks automáticos
+		if (!registeredModules.exists(modFolder)) {
+			registeredModules.set(modFolder, []);
+		}
+		registeredModules.get(modFolder).push(luaModule);
+	}
+
+	/**
+	 * Llama a un callback específico en todos los módulos registrados de un mod
+	 */
+	public static function callModuleCallback(modFolder:String, callbackName:String, ?args:Array<Dynamic>):Dynamic {
+		if (!registeredModules.exists(modFolder)) return LuaUtils.Function_Continue;
+		
+		var result:Dynamic = LuaUtils.Function_Continue;
+		for (luaModule in registeredModules.get(modFolder)) {
+			if (luaModule.callbacks.exists(callbackName)) {
+				var callResult:Dynamic = callModuleFunction(luaModule, callbackName, args);
+				if (callResult != LuaUtils.Function_Continue && callResult != null) {
+					result = callResult;
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Llama a una función específica en un módulo Lua
+	 */
+	static function callModuleFunction(luaModule:LuaModule, funcName:String, ?args:Array<Dynamic>):Dynamic {
+		if (luaModule.state == null) return LuaUtils.Function_Continue;
+		
+		Lua.getglobal(luaModule.state, funcName);
+		if (Lua.isfunction(luaModule.state, -1) == 0) {
+			Lua.pop(luaModule.state, 1);
+			return LuaUtils.Function_Continue;
+		}
+
+		// Pasar argumentos
+		if (args != null) {
+			for (arg in args) {
+				Convert.toLua(luaModule.state, arg);
+			}
+		}
+
+		var status:Int = Lua.pcall(luaModule.state, args != null ? args.length : 0, 1, 0);
+		
+		if (status != Lua.LUA_OK) {
+			var errorMsg:String = Lua.tostring(luaModule.state, -1);
+			Lua.pop(luaModule.state, 1);
+			if (PlayState.instance != null) {
+				PlayState.instance.addTextToDebug('Module callback error (' + luaModule.name + '.' + funcName + '): ' + errorMsg, FlxColor.RED);
+			}
+			return LuaUtils.Function_Continue;
+		}
+
+		var result:Dynamic = Convert.fromLua(luaModule.state, -1);
+		Lua.pop(luaModule.state, 1);
+		return result != null ? result : LuaUtils.Function_Continue;
 	}
 
 	/**
@@ -1885,7 +2135,20 @@ class FunkinLua {
 	 * Limpia el cache de módulos require (útil para recargar módulos durante desarrollo)
 	 */
 	static function clearRequireCache():Void {
+		// Cerrar todos los estados Lua de los módulos cacheados
+		for (key => value in requireCache) {
+			if (Std.isOfType(value, LuaModule)) {
+				var luaModule:LuaModule = cast value;
+				if (luaModule.state != null) {
+					stateContext.remove(luaModule.state);
+					Lua.close(luaModule.state);
+				}
+			}
+		}
 		requireCache.clear();
+		registeredModules.clear();
+		sharedState.clear();
+		stateContext.clear();
 	}
 	#end
 }
