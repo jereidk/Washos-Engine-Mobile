@@ -22,6 +22,10 @@ import haxe.Json;
 import backend.Mods;
 #end
 
+#if (android && cpp)
+import mobile.backend.AstcLoader;
+#end
+
 class Paths
 {
 	inline public static var SOUND_EXT = #if web "mp3" #else "ogg" #end;
@@ -46,6 +50,11 @@ class Paths
 					FlxG.bitmap._cache.remove(key);
 					openfl.Assets.cache.removeBitmapData(key);
 					currentTrackedAssets.remove(key);
+
+					// Remove ASTC tracking if applicable
+					#if (android && cpp)
+					AstcLoader.removeTracking(key);
+					#end
 
 					// and get rid of the object
 					obj.persist = false; // make sure the garbage collector actually clears it up
@@ -241,6 +250,14 @@ class Paths
 			else if (OpenFlAssets.exists(file, IMAGE))
 				bitmap = OpenFlAssets.getBitmapData(file);
 		}
+
+		// Try ASTC loading on Android if no bitmap loaded yet
+		#if (android && cpp)
+		if (bitmap == null && file != null)
+		{
+			bitmap = AstcLoader.tryLoad(file);
+		}
+		#end
 
 		if (bitmap != null)
 		{
